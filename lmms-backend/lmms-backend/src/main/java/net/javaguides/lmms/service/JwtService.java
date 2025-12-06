@@ -20,6 +20,7 @@ public class JwtService {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
+    //Tạo token cho người dùng
     public String generateToken(String username, String role){
         return Jwts.builder()
                 .setSubject(username)
@@ -29,6 +30,8 @@ public class JwtService {
                 .signWith(getSigningKey(),  SignatureAlgorithm.HS256)
                 .compact();
     }
+
+    //Lấy account người dùng dựa vào token
     public String extractUsername(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
@@ -38,6 +41,7 @@ public class JwtService {
                 .getSubject();
     }
 
+    //Lấy role người dùng dựa vào token
     public String extractRole(String token) {
         return (String) Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())

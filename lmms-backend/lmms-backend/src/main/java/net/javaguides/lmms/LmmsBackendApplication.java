@@ -12,8 +12,8 @@ public class LmmsBackendApplication {
 
         JwtService jwtService = context.getBean(JwtService.class);
 
-        String username = "alice";
-        String role = "ADMIN";
+        String username = "Lala";
+        String role = "USER";
 
         // 1. Tạo token
         String token = jwtService.generateToken(username, role);
