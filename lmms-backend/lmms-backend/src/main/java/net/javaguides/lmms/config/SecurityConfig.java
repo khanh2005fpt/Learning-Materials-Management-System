@@ -22,6 +22,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfig())) // Bật CORS
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() // cho phép login/register
+                        .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
+                        .requestMatchers("/api/user/**").hasAnyAuthority("USER")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form.disable()) // Tắt form login mặc định

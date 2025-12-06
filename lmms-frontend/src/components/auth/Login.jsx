@@ -13,7 +13,7 @@ export default function Login() {
             const res = await axios.post("/api/auth/login", { username, password });
             setMessage(res.data);
         } catch (err) {
-            setMessage(err.response?.data || "Error");
+            setMessage(err.response?.data?.message || "Error");
         }
     };
 
