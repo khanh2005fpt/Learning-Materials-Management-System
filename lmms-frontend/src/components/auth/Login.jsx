@@ -27,7 +27,10 @@ export default function Login() {
             // Lưu token và role vào localStorage
             localStorage.setItem("token", token);
             localStorage.setItem("role", role);
+            // Thông báo cho Navbar biết token đã thay đổi
+            window.dispatchEvent(new Event("token-changed"));
             // Redirect dựa theo role
+
             if (role === "ADMIN") {
                 navigate("/admin");
             } else if (role === "USER") {

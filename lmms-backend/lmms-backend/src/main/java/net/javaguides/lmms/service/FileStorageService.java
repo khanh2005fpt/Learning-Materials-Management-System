@@ -1,7 +1,9 @@
 package net.javaguides.lmms.service;
 
 
+import net.javaguides.lmms.entity.Book;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,6 +31,12 @@ public class FileStorageService {
         String fileName = StringUtils.cleanPath(System.currentTimeMillis() + "_" +file.getOriginalFilename()); //Tránh trùng tên file
         Path targetLocation = this.fileStorageLocation.resolve(fileName);
         Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+        return fileName;
+    }
+
+    public String deleteFile(String fileName) throws IOException {
+        Path targetLocation = this.fileStorageLocation.resolve(fileName);
+        Files.deleteIfExists(targetLocation);
         return fileName;
     }
 }

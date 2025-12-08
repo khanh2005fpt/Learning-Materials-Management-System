@@ -1,0 +1,14 @@
+package net.javaguides.lmms.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
+
+@Data
+@AllArgsConstructor
+public class UploadResponseDTO {
+    private MultipartFile filePath;
+    private String author;
+    private String title;
+    private String description;
+}
