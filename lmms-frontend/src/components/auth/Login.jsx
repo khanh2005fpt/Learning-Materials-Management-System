@@ -14,8 +14,11 @@ export default function Login() {
         e.preventDefault();
         try {
             const res = await axios.post("/api/auth/login", { username, password });
-            const { token, role } = res.data;
 
+            const { token, role } = res.data;
+            // console.log("Login response:", res.data);
+            // console.log("Token:", token);
+            // console.log("Role:", role);
             if (!token || !role) {
                 setMessage("Login failed: Invalid credentials");
                 return;
@@ -24,7 +27,6 @@ export default function Login() {
             // Lưu token và role vào localStorage
             localStorage.setItem("token", token);
             localStorage.setItem("role", role);
-
             // Redirect dựa theo role
             if (role === "ADMIN") {
                 navigate("/admin");

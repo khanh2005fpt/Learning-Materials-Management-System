@@ -6,8 +6,6 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import UserDashboard from './components/user/UserDashboard';
 import PrivateRoute from './components/auth/PrivateRoute';
 function App() {
-  const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
   return (
     <Routes>
       <Route path="/register" element={<Register />} />

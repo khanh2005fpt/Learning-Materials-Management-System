@@ -32,22 +32,22 @@ public class JwtService {
     }
 
     //Lấy account người dùng dựa vào token
-    public String extractUsername(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
-
-    //Lấy role người dùng dựa vào token
-    public String extractRole(String token) {
-        return (String) Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody().get("role");
-    }
+//    public String extractUsername(String token) {
+//        return Jwts.parserBuilder()
+//                .setSigningKey(getSigningKey())
+//                .build()
+//                .parseClaimsJws(token)
+//                .getBody()
+//                .getSubject();
+//    }
+//
+//    Lấy role người dùng dựa vào token
+//    public String extractRole(String token) {
+//        return (String) Jwts.parserBuilder()
+//                .setSigningKey(getSigningKey())
+//                .build()
+//                .parseClaimsJws(token)
+//                .getBody().get("role");
+//    }
 
 }

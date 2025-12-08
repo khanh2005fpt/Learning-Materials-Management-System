@@ -19,13 +19,13 @@ public class LmmsBackendApplication {
         String token = jwtService.generateToken(username, role);
         System.out.println("Token: " + token);
 
-        // 2. Lấy username từ token
-        String extractedUsername = jwtService.extractUsername(token);
-        System.out.println("Username extracted: " + extractedUsername);
-
-        // 3. Lấy role từ token
-        String extractedRole = jwtService.extractRole(token);
-        System.out.println("Role extracted: " + extractedRole);
+//        // 2. Lấy username từ token
+//        String extractedUsername = jwtService.extractUsername(token);
+//        System.out.println("Username extracted: " + extractedUsername);
+//
+//        // 3. Lấy role từ token
+//        String extractedRole = jwtService.extractRole(token);
+//        System.out.println("Role extracted: " + extractedRole);
     }
 
 }
