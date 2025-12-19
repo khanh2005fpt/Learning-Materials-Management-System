@@ -1,0 +1,21 @@
+package net.javaguides.lmms.controller;
+
+import lombok.RequiredArgsConstructor;
+import net.javaguides.lmms.dto.AIRequestDTO;
+import net.javaguides.lmms.service.AIService;
+import org.springframework.web.bind.annotation.*;
+
+
+@RestController
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
+public class AIController {
+
+
+    private final AIService aiService;
+
+    @PostMapping("/ask")
+    public String ask(@RequestBody AIRequestDTO aiRequestDTO) {
+        return aiService.generate(aiRequestDTO);
+    }
+}
