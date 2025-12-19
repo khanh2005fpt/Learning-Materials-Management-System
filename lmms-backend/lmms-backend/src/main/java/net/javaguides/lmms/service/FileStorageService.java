@@ -29,8 +29,8 @@ public class FileStorageService {
 
     public String storeFile(MultipartFile file) throws IOException {
         String fileName = StringUtils.cleanPath(System.currentTimeMillis() + "_" +file.getOriginalFilename()); //Tránh trùng tên file
-        Path targetLocation = this.fileStorageLocation.resolve(fileName);
-        Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+        Path targetLocation = this.fileStorageLocation.resolve(fileName); //Lấy đường dẫn để lưu file
+        Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING); //Ném file vào thư mục có upload
         return fileName;
     }
 

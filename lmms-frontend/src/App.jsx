@@ -3,9 +3,9 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import Register from './components/auth/Register';
 import Login from './components/auth/Login';
 import AdminDashboard from './components/admin/AdminDashboard';
-import UserDashboard from './components/user/UserDashboard';
 import PrivateRoute from './components/auth/PrivateRoute';
 import NavbarSystem from './components/common/NavbarSystem';
+import HomePage from './components/user/HomePage';
 
 function App() {
   const location = useLocation();
@@ -35,7 +35,7 @@ function App() {
           path="/user"
           element={
             <PrivateRoute allowedRoles={["USER", "ADMIN"]}>
-              <UserDashboard />
+              <HomePage />
             </PrivateRoute>
           }
         />
