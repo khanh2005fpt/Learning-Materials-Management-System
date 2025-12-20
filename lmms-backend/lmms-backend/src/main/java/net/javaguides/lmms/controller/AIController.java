@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import net.javaguides.lmms.dto.AIRequestDTO;
 import net.javaguides.lmms.service.AIService;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
+
+import java.util.Map;
 
 
 @RestController
@@ -15,7 +18,7 @@ public class AIController {
     private final AIService aiService;
 
     @PostMapping("/ask")
-    public String ask(@RequestBody AIRequestDTO aiRequestDTO) {
-        return aiService.generate(aiRequestDTO);
+    public String askGeminiAPI(@RequestBody AIRequestDTO aiRequestDTO) {
+        return aiService.askGemini(aiRequestDTO);
     }
 }
