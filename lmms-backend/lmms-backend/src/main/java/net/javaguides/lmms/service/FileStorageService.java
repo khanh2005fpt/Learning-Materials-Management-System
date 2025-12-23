@@ -19,6 +19,15 @@ public class FileStorageService {
 
     private final Path fileStorageLocation; //Đường dẫn thư mục file
 
+    //Check trùng file gốc
+    private boolean isDuplicateOriginalName(String originalFilename) throws IOException {
+        try (var paths = Files.list(fileStorageLocation)) {
+            return paths.anyMatch(path ->
+                    path.getFileName().toString().endsWith("_" + originalFilename)
+            );
+        }
+    }
+
     //Nhận giá trị từ file.upload-dir
     public FileStorageService(@Value("${file.upload-dir}") String fileStorageLocation) throws IOException{
         this.fileStorageLocation = Paths.get(fileStorageLocation).toAbsolutePath().normalize();  //chuyển thành đường dẫn ghép với uploads
@@ -28,16 +37,33 @@ public class FileStorageService {
     }
 
     public String storeFile(MultipartFile file) throws IOException {
-        String fileName = StringUtils.cleanPath(System.currentTimeMillis() + "_" +file.getOriginalFilename()); //Tránh trùng tên file
-        Path targetLocation = this.fileStorageLocation.resolve(fileName); //Lấy đường dẫn để lưu file
-        Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING); //Ném file vào thư mục có upload
+
+        String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
+
+        if (!originalFilename.toLowerCase().endsWith(".pdf")) {
+            throw new RuntimeException("Chỉ cho phép upload file PDF");
+        }
+
+        // Check trùng tên file gốc
+        if (isDuplicateOriginalName(originalFilename)) {
+            throw new RuntimeException("File PDF có tên '" + originalFilename + "' đã tồn tại");
+        }
+
+        String fileName = System.currentTimeMillis() + "_" + originalFilename;
+        Path targetLocation = this.fileStorageLocation.resolve(fileName);
+
+        Files.copy(file.getInputStream(), targetLocation);
+
         return fileName;
     }
+
 
     public String deleteFile(String fileName) throws IOException {
         Path targetLocation = this.fileStorageLocation.resolve(fileName);
         Files.deleteIfExists(targetLocation);
         return fileName;
     }
+
+
 }
 

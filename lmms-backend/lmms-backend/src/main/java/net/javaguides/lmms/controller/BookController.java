@@ -30,4 +30,19 @@ public class BookController {
         return bookRepository.findAll();
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteBook(@PathVariable Long id) {
+        return bookRepository.findById(id).map(book -> {
+            try {
+
+                bookService.deleteBook(id);
+
+                return ResponseEntity.ok("Book deleted successfully");
+            } catch (Exception e) {
+                return ResponseEntity.status(500).body("Error deleting book: " + e.getMessage());
+            }
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+
 }

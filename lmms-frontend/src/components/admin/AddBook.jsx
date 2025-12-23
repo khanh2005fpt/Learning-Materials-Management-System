@@ -30,7 +30,7 @@ export default function AddBook({ show, onHide, onUploaded }) {
             onUploaded();     // load lại danh sách sách
             onHide();         // đóng modal
         } catch (error) {
-            alert("Upload thất bại!");
+            alert(error.response?.data?.message || "Lỗi khi upload sách. Vui lòng thử lại.");
         }
     };
 

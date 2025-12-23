@@ -4,12 +4,9 @@ import {
   Row,
   Col,
   Card,
-  Form,
   Badge,
   Button,
   Alert,
-  Pagination,
-  Placeholder,
 } from "react-bootstrap";
 import axios from "axios";
 
@@ -52,6 +49,7 @@ export default function HomePage() {
           </Button>
         </Alert>
       )}
+      
 
       {books.length === 0 ? (
         <div className="text-center py-5">
