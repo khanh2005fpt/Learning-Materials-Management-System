@@ -47,6 +47,7 @@ export default function AdminDashboard() {
                         <th>Tiêu đề</th>
                         <th>Tác giả</th>
                         <th>Mô tả</th>
+                        <th>Thể loại</th>
                         <th style={{ width: "120px" }}>Hành động</th>
                     </tr>
                 </thead>
@@ -56,6 +57,7 @@ export default function AdminDashboard() {
                             <td>{b.title}</td>
                             <td>{b.author}</td>
                             <td>{b.description}</td>
+                            <td>{b.category.name}</td>
                             <td className="text-center">
                                 <Button
                                     variant="danger"

@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Form, Button, Alert } from "react-bootstrap";
+import { Form, Button, Alert, Row, Col } from "react-bootstrap";
 import axios from "axios";
+import "./css/Register.css";
 
 export default function Register() {
     const [fullname, setFullname] = useState("");
@@ -23,11 +24,13 @@ export default function Register() {
     };
 
     return (
-        <Form onSubmit={handleSubmit} style={{ maxWidth: "500px", margin: "auto" }}>
-            <h2>Register</h2>
+      <div className="auth-page register-page">
+        <div className="auth-card">
+          <Form onSubmit={handleSubmit} className="register-form">
+            <h2 className="auth-title">Đăng ký</h2>
             {message && <Alert variant="info">{message}</Alert>}
             <Form.Group className="mb-3">
-                <Form.Label>Full Name</Form.Label>
+                <Form.Label>Tên đầy đủ</Form.Label>
                 <Form.Control
                     type="text"
                     value={fullname}
@@ -45,7 +48,7 @@ export default function Register() {
                 />
             </Form.Group>
             <Form.Group className="mb-3">
-                <Form.Label>Username</Form.Label>
+                <Form.Label>Tên đăng nhập</Form.Label>
                 <Form.Control
                     type="text"
                     value={username}
@@ -54,7 +57,7 @@ export default function Register() {
                 />
             </Form.Group>
             <Form.Group className="mb-3">
-                <Form.Label>Password</Form.Label>
+                <Form.Label>Mật khẩu</Form.Label>
                 <Form.Control
                     type="password"
                     value={password}
@@ -62,7 +65,16 @@ export default function Register() {
                     required
                 />
             </Form.Group>
-            <Button variant="primary" type="submit">Register</Button>
-        </Form>
+            <Row className="d-flex justify-content-between">
+                <Col>
+                <Button className="submit-btn" variant="primary" type="submit">Đăng ký</Button>
+                </Col>
+                <Col>
+                <Button className="submit-btn" variant="secondary" href="/">Quay lại trang chủ</Button>
+                </Col>
+            </Row>
+          </Form>
+        </div>
+      </div>
     );
 }

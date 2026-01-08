@@ -31,11 +31,12 @@ function App() {
           }
         />
 
-        <Route
+        <Route path="/" element={<HomePage />} />
+         <Route
           path="/user"
           element={
-            <PrivateRoute allowedRoles={["USER", "ADMIN"]}>
-              <HomePage />
+            <PrivateRoute allowedRoles={["USER"]}>
+              {<HomePage />}
             </PrivateRoute>
           }
         />

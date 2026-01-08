@@ -25,13 +25,15 @@ export default function NavbarSystem() {
         // gửi event để Navbar update
         window.dispatchEvent(new Event("token-changed"));
 
-        window.location.href = "/login";
+        window.location.href = "/";
     };
 
     return (
         <Navbar bg="dark" variant="dark" expand="lg" sticky="top">
             <Container>
-                <Navbar.Brand href="/">Bảo Khánh</Navbar.Brand>
+                <Navbar.Brand href="/" className="fw-bold fs-4 text-info">
+                    📚 Bảo Khánh
+                </Navbar.Brand>
 
                 <Nav className="ms-auto">
                     {!isLoggedIn ? (

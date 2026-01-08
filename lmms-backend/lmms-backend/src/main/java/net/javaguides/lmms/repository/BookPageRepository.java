@@ -8,8 +8,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface BookPageRepository extends JpaRepository<BookPage, Long> {
-    @Modifying
     @Transactional
-    @Query("DELETE FROM BookPage bp WHERE bp.book.id = :bookId")
-    void deleteByBookId(@Param("bookId") Long bookId);
+    void deleteByBookId(Long bookId);
 }

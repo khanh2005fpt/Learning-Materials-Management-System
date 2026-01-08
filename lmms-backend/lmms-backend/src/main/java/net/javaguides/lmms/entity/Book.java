@@ -21,6 +21,8 @@ public class Book {
     @Column(nullable = false)
     private String filepath;
 
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<BookPage> pages;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
 }

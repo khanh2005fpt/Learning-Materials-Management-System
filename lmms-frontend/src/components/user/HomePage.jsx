@@ -1,127 +1,199 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Container,
   Row,
   Col,
   Card,
-  Badge,
   Button,
   Alert,
+  InputGroup,
+  FormControl,
+  Spinner
 } from "react-bootstrap";
 import axios from "axios";
+import AIAnswer from "./AIAnswer";
+import "./css/HomePage.css";
 
 export default function HomePage() {
   const [books, setBooks] = useState([]);
   const [error, setError] = useState(null);
+  const [question, setQuestion] = useState("");
 
-  const fetchBooks = async () => {
+  // States cho AI
+  const [aiAnswer, setAiAnswer] = useState("");
+  const [typedAnswer, setTypedAnswer] = useState("");
+  const [aiSources, setAiSources] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const shouldHideBooks = loading || aiAnswer !== "";
+
+  // Fetch danh sách sách ban đầu
+  const fetchBooks = useCallback(async () => {
     setError(null);
     try {
       const res = await axios.get("/api/books");
-      setBooks(res.data);
+      setBooks(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       setError("Không thể tải danh sách sách. Vui lòng thử lại.");
       console.error("Lỗi tải sách:", err);
-    } 
-  };
+    }
+  }, []);
 
   useEffect(() => {
     fetchBooks();
-  }, []);
+  }, [fetchBooks]);
 
+  // Xử lý tìm kiếm và hỏi AI
+  const handleSearch = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      return;
+    }
+    if (!question.trim()) return;
+
+    setLoading(true);
+    setError(null);
+    setAiAnswer(""); // Reset câu trả lời cũ
+    setTypedAnswer("");
+
+    try {
+      const resAi = await axios.post("/api/auth/ask", { question });
+      setAiAnswer(resAi.data.answer || "Không tìm thấy câu trả lời.");
+      setAiSources(resAi.data.aiResponseDTOListPage || []);
+    } catch (err) {
+      console.error(err);
+      setError("Có lỗi xảy ra khi kết nối với AI. Vui lòng thử lại.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Hiệu ứng Typewriter (Gõ chữ)
+  useEffect(() => {
+    if (!aiAnswer) return;
+
+    let index = 0;
+    const interval = setInterval(() => {
+      setTypedAnswer((prev) => prev + aiAnswer.charAt(index));
+      index++;
+      if (index >= aiAnswer.length) {
+        clearInterval(interval);
+      }
+    }, 15); // Tăng tốc độ gõ một chút cho trải nghiệm mượt hơn
+
+    return () => clearInterval(interval);
+  }, [aiAnswer]);
 
   return (
-    <Container className="my-5">
-      {/* Tiêu đề */}
-      <div className="text-center mb-5">
-        <h1 className="display-5 fw-bold text-primary">Thư viện Sách & Tài liệu</h1>
-        <p className="lead text-muted">Khám phá và đọc hàng ngàn tài liệu miễn phí</p>
-      </div>
+    <Container className="home-page">
+      {/* Header Section */}
+      <header className="home-hero text-center mb-5">
+        <h1 className="display-4 fw-bold home-title mb-2">
+          Thư viện Sách & Tài liệu
+        </h1>
+        <p className="lead text-muted mx-auto" style={{ maxWidth: "600px" }}>
+          Tra cứu thông tin thông minh với AI và khám phá hàng ngàn tài liệu học thuật miễn phí.
+        </p>
+      </header>
 
+      {/* Search Bar Section */}
+      {/* Search Bar Section */}
+      <Row className="justify-content-center mb-5">
+        <Col lg={8}>
+          <InputGroup size="lg" className="shadow-sm position-relative home-search">
+            <FormControl
+              placeholder={localStorage.getItem("token") ? "Nhập câu hỏi về tài liệu..." : "Đăng nhập để đặt câu hỏi cho AI..."}
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            // Vô hiệu hóa input nếu muốn cưỡng ép đăng nhập
+            // disabled={!localStorage.getItem("token")} 
+            />
+            <Button
+              variant={localStorage.getItem("token") ? "primary" : "secondary"}
+              onClick={handleSearch}
+              disabled={loading}
+              className="px-4"
+            >
+              {loading ? <Spinner animation="border" size="sm" /> : "Hỏi AI"}
+            </Button>
+          </InputGroup>
 
-      {/* Thông báo lỗi */}
+          {/* Hiển thị nút đăng nhập nhanh nếu chưa có token */}
+          {!localStorage.getItem("token") && (
+            <p className="text-center mt-2 small text-muted">
+              Bạn chưa đăng nhập? <a href="/login" className="text-primary fw-bold">Đăng nhập ngay</a> để sử dụng AI.
+            </p>
+          )}
+        </Col>
+      </Row>
+
+      {/* AI Response Display Area */}
+      <Row className="justify-content-center mb-5">
+        <Col lg={10} className="ai-area">
+          {loading && !typedAnswer && (
+            <div className="text-center my-4">
+              <Spinner animation="grow" variant="primary" />
+              <p className="text-muted mt-2">AI đang tìm kiếm...</p>
+            </div>
+          )}
+          <div className="ai-card">
+            <AIAnswer answer={typedAnswer} sources={aiSources} />
+          </div>
+        </Col>
+      </Row>
+
+      {/* Error Alert */}
       {error && (
-        <Alert variant="danger" className="d-flex justify-content-between align-items-center">
-          <span>{error}</span>
-          <Button variant="outline-danger" size="sm" onClick={fetchBooks}>
-            <i className="bi bi-arrow-clockwise me-2"></i>
-            Thử lại
-          </Button>
+        <Alert variant="danger" className="d-flex align-items-center justify-content-between shadow-sm">
+          <div>
+            <i className="bi bi-exclamation-triangle-fill me-2"></i>
+            {error}
+          </div>
+          <Button variant="outline-danger" size="sm" onClick={fetchBooks}>Thử lại</Button>
         </Alert>
       )}
-      
 
-      {books.length === 0 ? (
-        <div className="text-center py-5">
-          <div className="display-1 text-muted mb-4">📚</div>
-          <h4 className="text-muted">Không tìm thấy sách nào</h4>
-        </div>
-      ) : (
-        <>
+      {/* Books Gallery */}
+      {!shouldHideBooks && (
+        <section className="mt-5 books-section">
+          <div className="d-flex align-items-center mb-4">
+            <h2 className="h4 fw-bold mb-0">📚 Tài liệu phổ biến</h2>
+            <hr className="flex-grow-1 ms-3 opacity-25" />
+          </div>
+
           <Row>
-            {books.map((book) => (
-              <Col key={book.id} md={6} lg={4} className="mb-4">
-                <Card
-                  className="h-100 shadow-sm border-0 overflow-hidden"
-                  style={{ transition: "all 0.3s ease" }}
-                >
-                  {book.coverImage ? (
-                    <Card.Img
-                      variant="top"
-                      src={`/uploads/covers/${book.coverImage}`}
-                      alt={book.title}
-                      style={{ height: "220px", objectFit: "cover" }}
-                    />
-                  ) : (
-                    <div
-                      className="d-flex align-items-center justify-content-center bg-light"
-                      style={{ height: "220px" }}
-                    >
-                      <i className="bi bi-book display-4 text-muted opacity-50"></i>
-                    </div>
-                  )}
-
-                  <Card.Body className="d-flex flex-column">
-                    <Card.Title className="fw-bold text-primary mb-2">
-                      {book.title}
-                    </Card.Title>
-
-                    <Card.Subtitle className="mb-3 text-muted small">
-                      <i className="bi bi-person me-1"></i>
-                      {book.author || "Không rõ tác giả"}
-                    </Card.Subtitle>
-
-                    {book.category && (
-                      <Badge bg="info" className="mb-3 align-self-start">
-                        {book.category}
-                      </Badge>
-                    )}
-
-                    <Card.Text
-                      className="text-muted flex-grow-1"
-                    >
-                      {book.description || "Không có mô tả."}
-                    </Card.Text>
-
-                    <div className="mt-auto">
+            {books.length > 0 ? (
+              books.map((book) => (
+                <Col md={6} lg={4} key={book.id} className="mb-4">
+                  <Card className="h-100 border-0 shadow-sm hover-shadow transition book-card">
+                    <Card.Body className="d-flex flex-column">
+                      <div className="mb-2">
+                        <span className="badge bg-light text-primary border">PDF</span>
+                      </div>
+                      <Card.Title className="h5 fw-bold">{book.title}</Card.Title>
+                      <Card.Text className="text-muted mb-4 small">
+                        Tác giả: {book.author || "Đang cập nhật"}
+                      </Card.Text>
                       <Button
-                        as="a"
-                        href={`http://localhost:8080/uploads/${book.filepath}`}
-                        target="_blank"
-                        rel="noreferrer"
                         variant="outline-primary"
-                        className="w-100"
+                        className="mt-auto w-100"
+                        onClick={() => window.open(`http://localhost:8080/uploads/${book.filepath}`, "_blank")}
                       >
-                        <i className="bi bi-file-earmark-text me-2"></i>
-                        Xem tài liệu
+                        Đọc tài liệu
                       </Button>
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))}
+                    </Card.Body>
+                  </Card>
+                </Col>
+              ))
+            ) : (
+              !loading && <p className="text-center text-muted">Chưa có sách nào trong thư viện.</p>
+            )}
+
           </Row>
-        </>
+
+        </section>
       )}
     </Container>
   );

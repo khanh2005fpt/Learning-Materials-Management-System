@@ -3,6 +3,7 @@ package net.javaguides.lmms.controller;
 import lombok.RequiredArgsConstructor;
 import net.javaguides.lmms.dto.UploadResponseDTO;
 import net.javaguides.lmms.entity.Book;
+import net.javaguides.lmms.entity.Category;
 import net.javaguides.lmms.repository.BookRepository;
 import net.javaguides.lmms.service.BookService;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +22,9 @@ public class BookController {
     public Book uploadBook(@RequestParam("file") MultipartFile file,
                            @RequestParam(required = false) String author,
                            @RequestParam(required = false) String title,
-                           @RequestParam(required = false) String description) throws Exception {
-        return bookService.createBook(new UploadResponseDTO(file, author, title, description));
+                           @RequestParam(required = false) String description,
+                           @RequestParam(required = false) String categoryName) throws Exception {
+        return bookService.createBook(new UploadResponseDTO(file, author, title, description, categoryName));
     }
 
     @GetMapping

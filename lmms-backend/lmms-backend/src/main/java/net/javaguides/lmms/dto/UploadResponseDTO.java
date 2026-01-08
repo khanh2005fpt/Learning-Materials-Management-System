@@ -11,4 +11,5 @@ public class UploadResponseDTO {
     private String author;
     private String title;
     private String description;
+    private String categoryName;
 }

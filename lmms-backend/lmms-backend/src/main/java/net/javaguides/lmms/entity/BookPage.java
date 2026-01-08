@@ -19,7 +19,7 @@ public class BookPage {
     private String content;
 
     @ManyToOne
-    @JoinColumn(name = "book_id")
+    @JoinColumn(name = "book_id", nullable = false)
     @JsonIgnore
     private Book book;
 }

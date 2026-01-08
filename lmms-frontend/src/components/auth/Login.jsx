@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Form, Button, Alert, Container } from "react-bootstrap";
 import axios from "axios";
+import "./css/Login.css";
 
 export default function Login() {
     const [username, setUsername] = useState("");
@@ -44,36 +45,36 @@ export default function Login() {
     };
 
     return (
-        <Container style={{ maxWidth: "500px", marginTop: "50px" }}>
-            <Form onSubmit={handleSubmit}>
-                <h2 className="text-center mb-4">Login</h2>
+      <div className="auth-page login-page">
+        <div className="auth-card">
+          <Form onSubmit={handleSubmit} className="auth-form">
+            <h2 className="auth-title text-center mb-4">Đăng nhập</h2>
 
-                {message && <Alert variant="danger">{message}</Alert>}
+            {message && <Alert variant="danger">{message}</Alert>}
 
-                <Form.Group className="mb-3">
-                    <Form.Label>Username</Form.Label>
-                    <Form.Control
-                        type="text"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        required
-                    />
-                </Form.Group>
+            <Form.Group className="mb-3">
+                <Form.Label>Tên đăng nhập</Form.Label>
+                <Form.Control
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                />
+            </Form.Group>
 
-                <Form.Group className="mb-3">
-                    <Form.Label>Password</Form.Label>
-                    <Form.Control
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </Form.Group>
+            <Form.Group className="mb-3">
+                <Form.Label>Mật khẩu</Form.Label>
+                <Form.Control
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                />
+            </Form.Group>
 
-                <Button variant="primary" type="submit" className="w-100">
-                    Login
-                </Button>
-            </Form>
-        </Container>
+            <Button className="submit-btn" variant="primary" type="submit">Đăng nhập</Button>
+          </Form>
+        </div>
+      </div>
     );
 }

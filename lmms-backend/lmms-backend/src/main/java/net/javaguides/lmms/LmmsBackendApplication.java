@@ -3,8 +3,10 @@ package net.javaguides.lmms;
 import net.javaguides.lmms.service.JwtService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
+@EnableAsync
 public class LmmsBackendApplication {
 
     public static void main(String[] args) {

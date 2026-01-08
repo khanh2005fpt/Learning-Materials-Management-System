@@ -1,0 +1,81 @@
+/* Register.css - polished styles for Register page */
+.auth-page.register-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+    min-height: 100vh; /* <-- thêm dòng này */
+  background: linear-gradient(120deg, #0f172a 0%, #071133 50%, #0f172a 100%);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 520px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  border-radius: 12px;
+  padding: 28px 28px;
+  box-shadow: 0 10px 30px rgba(4, 6, 17, 0.6);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.auth-title {
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 18px;
+  font-size: 1.5rem;
+  letter-spacing: 0.3px;
+}
+
+.register-form .form-label {
+  color: rgba(255,255,255,0.85);
+  font-weight: 600;
+}
+
+.register-form .form-control {
+  background: rgba(255,255,255,0.03);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 12px 12px;
+  border-radius: 8px;
+}
+
+.register-form .form-control:focus {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(99,102,241,0.9);
+  box-shadow: 0 0 0 0.2rem rgba(99,102,241,0.18);
+  color: #fff;
+}
+
+.auth-card .alert {
+  background: rgba(255,255,255,0.03);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.submit-btn {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+  border: none;
+  color: white;
+}
+
+.submit-btn:hover,
+.submit-btn:focus {
+  filter: brightness(1.03);
+  box-shadow: 0 8px 22px rgba(139,92,246,0.18);
+}
+
+/* Responsive tweaks */
+@media (max-width: 576px) {
+  .auth-card {
+    padding: 20px;
+    border-radius: 10px;
+  }
+  .auth-title { font-size: 1.25rem; }
+}
