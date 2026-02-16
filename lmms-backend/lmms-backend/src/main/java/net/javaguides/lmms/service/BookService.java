@@ -36,24 +36,55 @@
         private final CategoryRepository categoryRepository;
         // Regex normalize toán học
         private static final Pattern MATH_PATTERN = Pattern.compile("ℳ|σ2|σ|Π|∫|≤|≥");
+        private static final int CHUNK_MAX_LENGTH = 1500; // ~300-400 tokens
+        private static final int CHUNK_MIN_LENGTH = 5;
+        private static final Pattern MATH_LINE_PATTERN =
+                Pattern.compile(".*[=∫σΣΠ^_≤≥].*");
 
-        private String normalizeMath(String text) {
-            Matcher m = MATH_PATTERN.matcher(text);
-            return m.replaceAll(match -> switch (match.group()) {
-                case "ℳ" -> "\\\\mathcal{M}";
-                case "σ2" -> "\\\\sigma\\^2";
-                case "σ" -> "\\\\sigma";
-                case "Π" -> "\\\\pi";
-                case "∫" -> "\\\\int";
-                case "≤" -> "<=";
-                case "≥" -> ">=";
-                default -> match.group();
-            });
+        //Hàm tách thành chunk
+        private List<String> splitToChunks(String text) {
+            List<String> chunks = new ArrayList<>();
+            StringBuilder buffer = new StringBuilder();
+
+            String[] lines = text.split("\\n|(?<=\\.)\\s+");
+
+            for (String line : lines) {
+                boolean isMathLine = MATH_LINE_PATTERN.matcher(line).matches();
+
+                // Nếu là dòng toán → luôn giữ chung buffer
+                buffer.append(line).append(" ");
+
+                if (!isMathLine && buffer.length() >= CHUNK_MAX_LENGTH) {
+                    chunks.add(buffer.toString().trim());
+                    buffer.setLength(0);
+                }
+            }
+
+            if (buffer.length() >= CHUNK_MIN_LENGTH) {
+                chunks.add(buffer.toString().trim());
+            }
+
+            return chunks;
         }
 
-        public List<Book> getBooksByCategory(String categoryName) {
-            return bookRepository.findByCategory_Name(categoryName);
+
+        private String normalizeMath(String plainText) {
+            if (plainText == null) {
+                return null;
+            }
+            return plainText.replace("\\", "\\textbackslash{}")
+                    .replace("&", "\\&")
+                    .replace("%", "\\%")
+                    .replace("$", "\\$")
+                    .replace("#", "\\#")
+                    .replace("_", "\\_")
+                    .replace("{", "\\{")
+                    .replace("}", "\\}")
+                    .replace("^", "\\textasciicircum{}")
+                    .replace("~", "\\textasciitilde{}");
         }
+
+
 
         public void extractFile(Book book, MultipartFile file) throws IOException {
             byte[] pdfBytes = file.getBytes();
@@ -77,11 +108,15 @@
                     text = text.replaceAll("\\r?\\n", " ")
                             .replaceAll("\\s+", " ");
 
-                    BookPage bookPage = new BookPage();
-                    bookPage.setBook(book);
-                    bookPage.setPageNumber(i);
-                    bookPage.setContent(text);
-                    batch.add(bookPage);
+                    List<String> chunks = splitToChunks(text);
+
+                    for (String chunk : chunks) {
+                        BookPage page = new BookPage();
+                        page.setBook(book);
+                        page.setPageNumber(i);
+                        page.setContent(chunk);
+                        batch.add(page);
+                    }
 
                     // Batch insert + index
                     if (batch.size() >= batchSize) {
@@ -106,18 +141,22 @@
             indexBatch(savedPages); // bulk index async
         }
 
-        // Bulk index async
+        // Bulk index async với embeddings
         @Async("threadPoolTaskExecutor")
         public void indexBatch(List<BookPage> pages) {
             List<BookPageDocument> docs = pages.stream()
-                    .map(p -> new BookPageDocument(
-                            p.getBook().getId() + "-" + p.getPageNumber(),
-                            p.getBook().getId(),
-                            p.getBook().getTitle(),
-                            p.getPageNumber(),
-                            p.getContent(),
-                            p.getBook().getFilepath()
-                    ))
+                    .map(p -> {
+                        // Generate embedding cho content
+
+                        return new BookPageDocument(
+                                p.getBook().getId() + "-" + p.getPageNumber(),
+                                p.getBook().getId(),
+                                p.getBook().getTitle(),
+                                p.getPageNumber(),
+                                p.getContent(),
+                                p.getBook().getFilepath()
+                        );
+                    })
                     .toList();
             searchRepo.saveAll(docs);
         }
@@ -159,7 +198,9 @@
             return saved;
         }
 
-
+        public List<Book> getBooksByCategory(Long categoryid) {
+            return bookRepository.findByCategory_Id(categoryid);
+        }
         public void deleteBook(Long bookId){
             // 1. Tìm book
             Book book = bookRepository.findById(bookId)

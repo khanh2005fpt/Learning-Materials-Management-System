@@ -8,17 +8,20 @@ import {
   Alert,
   InputGroup,
   FormControl,
-  Spinner
+  Spinner,
+  ListGroup
 } from "react-bootstrap";
 import axios from "axios";
-import AIAnswer from "./AIAnswer";
+import AIAnswer from "./AIAnswer.jsx";
 import "./css/HomePage.css";
+import "./css/Categories.css";
 
 export default function HomePage() {
   const [books, setBooks] = useState([]);
   const [error, setError] = useState(null);
   const [question, setQuestion] = useState("");
-
+  const [categories, setCategories] = useState([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState("ALL");
   // States cho AI
   const [aiAnswer, setAiAnswer] = useState("");
   const [typedAnswer, setTypedAnswer] = useState("");
@@ -27,11 +30,26 @@ export default function HomePage() {
 
   const shouldHideBooks = loading || aiAnswer !== "";
 
+  const fetchCategories = useCallback(async () => {
+    try {
+      const res = await axios.get("/api/categories");
+      setCategories([{ id: "ALL", name: "Tất cả" }, ...res.data]);
+    } catch (err) {
+      console.error("Lỗi tải category", err);
+    }
+  }, []);
+
+
   // Fetch danh sách sách ban đầu
-  const fetchBooks = useCallback(async () => {
+  const fetchBooks = useCallback(async (categoryId = null) => {
     setError(null);
     try {
-      const res = await axios.get("/api/books");
+      const url =
+        categoryId && categoryId !== "ALL"
+          ? `/api/categories/${categoryId}`
+          : `/api/books`;
+
+      const res = await axios.get(url);
       setBooks(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       setError("Không thể tải danh sách sách. Vui lòng thử lại.");
@@ -40,8 +58,9 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
+    fetchCategories();
     fetchBooks();
-  }, [fetchBooks]);
+  }, [fetchCategories, fetchBooks]);
 
   // Xử lý tìm kiếm và hỏi AI
   const handleSearch = async () => {
@@ -86,10 +105,10 @@ export default function HomePage() {
   }, [aiAnswer]);
 
   return (
-    <Container className="home-page">
+    <Container className="home-page" >
       {/* Header Section */}
-      <header className="home-hero text-center mb-5">
-        <h1 className="display-4 fw-bold home-title mb-2">
+      <header className="home-hero text-center">
+        <h1 className="display-4 fw-bold home-title">
           Thư viện Sách & Tài liệu
         </h1>
         <p className="lead text-muted mx-auto" style={{ maxWidth: "600px" }}>
@@ -98,8 +117,7 @@ export default function HomePage() {
       </header>
 
       {/* Search Bar Section */}
-      {/* Search Bar Section */}
-      <Row className="justify-content-center mb-5">
+      <Row className="justify-content-center">
         <Col lg={8}>
           <InputGroup size="lg" className="shadow-sm position-relative home-search">
             <FormControl
@@ -138,7 +156,7 @@ export default function HomePage() {
               <p className="text-muted mt-2">AI đang tìm kiếm...</p>
             </div>
           )}
-          <div className="ai-card">
+          <div>
             <AIAnswer answer={typedAnswer} sources={aiSources} />
           </div>
         </Col>
@@ -156,6 +174,7 @@ export default function HomePage() {
       )}
 
       {/* Books Gallery */}
+
       {!shouldHideBooks && (
         <section className="mt-5 books-section">
           <div className="d-flex align-items-center mb-4">
@@ -164,10 +183,30 @@ export default function HomePage() {
           </div>
 
           <Row>
+            <Col md={3}>
+              <div className="categories-section">
+                <h3 className="categories-title">Thể loại</h3>
+                <div className="categories-list">
+                  {categories.map((cat) => (
+                    <button
+                      key={cat.id}
+                      className={`category-item ${selectedCategoryId === cat.id ? 'active' : ''}`}
+                      onClick={() => {
+                        setSelectedCategoryId(cat.id);
+                        fetchBooks(cat.id);
+                      }}
+                    >
+                      {cat.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </Col>
+            <Col md={9} className="d-flex">
             {books.length > 0 ? (
               books.map((book) => (
                 <Col md={6} lg={4} key={book.id} className="mb-4">
-                  <Card className="h-100 border-0 shadow-sm hover-shadow transition book-card">
+                  <Card className="border-0 shadow-sm hover-shadow transition book-card">
                     <Card.Body className="d-flex flex-column">
                       <div className="mb-2">
                         <span className="badge bg-light text-primary border">PDF</span>
@@ -190,6 +229,7 @@ export default function HomePage() {
             ) : (
               !loading && <p className="text-center text-muted">Chưa có sách nào trong thư viện.</p>
             )}
+            </Col>
 
           </Row>
 

@@ -2,7 +2,9 @@ package net.javaguides.lmms.controller;
 
 import lombok.RequiredArgsConstructor;
 import net.javaguides.lmms.dto.CategoryRequestDTO;
+import net.javaguides.lmms.entity.Book;
 import net.javaguides.lmms.entity.Category;
+import net.javaguides.lmms.service.BookService;
 import net.javaguides.lmms.service.CategoryService;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +16,7 @@ import java.util.List;
 @CrossOrigin("*")
 public class CategoryController {
     private final CategoryService categoryService;
+    private final BookService bookService;
 
 
     @PostMapping
@@ -27,12 +30,9 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    public Category getById(@PathVariable Long id) {
-        return categoryService.getById(id);
+    public List<Book> getBooksByCategory(@PathVariable Long id) {
+        return bookService.getBooksByCategory(id);
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        categoryService.delete(id);
-    }
+
 }

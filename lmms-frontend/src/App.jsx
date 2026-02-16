@@ -6,6 +6,7 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import PrivateRoute from './components/auth/PrivateRoute';
 import NavbarSystem from './components/common/NavbarSystem';
 import HomePage from './components/user/HomePage';
+import Footer from './components/common/Footer';
 
 function App() {
   const location = useLocation();
@@ -41,6 +42,8 @@ function App() {
           }
         />
       </Routes>
+
+      {!hideNavbar && <Footer />}
     </>
   );
 }

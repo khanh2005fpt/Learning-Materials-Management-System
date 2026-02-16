@@ -16,14 +16,20 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AIController {
 
-
     private final AIService aiService;
 
+    /**
+     * Semantic search - tìm kiếm dựa trên ý nghĩa của câu hỏi
+     * Sử dụng embeddings để so sánh độ tương đồng với nội dung các trang
+     */
     @PostMapping("/search")
     public List<AIResponseDTO> search(@RequestBody AIRequestDTO aiRequestDTO) {
         return aiService.searchPages(aiRequestDTO);
     }
 
+    /**
+     * Trả lời câu hỏi sử dụng semantic search + Gemini API
+     */
     @PostMapping("/ask")
     public FullAIResponseDTO askGeminiAPI(@RequestBody AIRequestDTO aiRequestDTO) {
         return aiService.askGemini(aiRequestDTO);

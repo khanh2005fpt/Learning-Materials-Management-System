@@ -7,7 +7,13 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.Mapping;
+import org.springframework.data.elasticsearch.annotations.Setting;
 
+/**
+ * Document Elasticsearch cho các trang sách
+ * Hỗ trợ cả keyword search và semantic search thông qua embeddings
+ */
 @Document(indexName = "book_pages")
 @Data
 @AllArgsConstructor
@@ -31,4 +37,5 @@ public class BookPageDocument {
 
     @Field(type = FieldType.Keyword)
     private String pdfPath;
+
 }

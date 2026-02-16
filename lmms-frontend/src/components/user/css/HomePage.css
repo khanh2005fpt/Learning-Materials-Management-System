@@ -1,49 +1,53 @@
-/* HomePage.css - polished, responsive layout for home page */
+/* HomePage.css - light, fresh color scheme matching Login page */
 .home-page {
   min-height: 100vh;
-  padding-top: 48px;
-  padding-bottom: 64px;
-  background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+  padding-top: 20px;
+
 }
 
 /* Hero */
 .home-hero .home-title {
-  color: #4f46e5; /* purple-600 */
+  color: #0f172a;
   font-weight: 800;
   letter-spacing: -0.02em;
 }
 .home-hero .lead {
-  color: #6b7280; /* gray-500 */
+  color: #64748b;
 }
 
 /* Search */
 .home-search .form-control {
   height: 56px;
   border-radius: 14px 0 0 14px;
-  border: 1px solid rgba(99,102,241,0.12);
-  box-shadow: 0 6px 20px rgba(99,102,241,0.06);
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 6px 20px rgba(6,182,212,0.06);
   font-size: 1rem;
+}
+.home-search .form-control::placeholder {
+  color: #94a3b8;
 }
 .home-search .btn {
   border-radius: 0 14px 14px 0;
-  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(90deg, #06b6d4 0%, #3b82f6 100%);
   color: #fff;
   border: none;
-  box-shadow: 0 8px 20px rgba(99,102,241,0.12);
+  box-shadow: 0 8px 20px rgba(59,130,246,0.12);
   font-weight: 700;
 }
-.home-search .text-muted a { color: #4f46e5; }
+.home-search .text-muted a { color: #06b6d4; }
 
 /* AI area */
 .ai-area .ai-card {
-  background: #fff;
+  background: #ffffff;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
-  border: 1px solid rgba(17, 24, 39, 0.03);
+  box-shadow: 0 10px 30px rgba(15,23,42,0.08);
+  border: 1px solid #e2e8f0;
 }
 .ai-area .ai-answer {
-  color: #111827;
+  color: #0f172a;
   line-height: 1.6;
   font-size: 1rem;
 }
@@ -53,22 +57,25 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  color: #0f172a;
 }
 .books-section .book-card {
-  background: #fff;
+  background: #ffffff;
   border-radius: 12px;
   padding: 18px;
   transition: transform .22s ease, box-shadow .22s ease;
-  box-shadow: 0 8px 24px rgba(15,23,42,0.06);
-  border: 1px solid rgba(17,24,39,0.03);
+  box-shadow: 0 8px 24px rgba(15,23,42,0.08);
+  border: 1px solid #e2e8f0;
 }
+
 .books-section .book-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 18px 40px rgba(15,23,42,0.12);
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(6,182,212,0.12);
 }
+
 .books-section .book-card .badge {
-  background: rgba(99,102,241,0.08);
-  color: #4f46e5;
+  background: rgba(6,182,212,0.1);
+  color: #0d9488;
   font-weight: 700;
   border-radius: 8px;
   padding: 6px 8px;
@@ -77,12 +84,13 @@
   color: #0f172a;
 }
 .books-section .book-card .card-text {
-  color: #6b7280;
+  color: #64748b;
 }
 .books-section .book-card .btn-outline-primary {
-  color: #4f46e5;
-  border-color: rgba(79,70,229,0.12);
-  background: linear-gradient(90deg, rgba(99,102,241,0.06) 0%, rgba(139,92,246,0.04) 100%);
+  color: #06b6d4;
+  border-color: #e2e8f0;
+  background: linear-gradient(90deg, rgba(6,182,212,0.05) 0%, rgba(59,130,246,0.05) 100%);
+}
 }
 
 /* small screens */

@@ -11,14 +11,9 @@ import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.data.elasticsearch.core.query.HighlightQuery;
-import org.springframework.data.elasticsearch.core.query.highlight.Highlight;
-import org.springframework.data.elasticsearch.core.query.highlight.HighlightField;
-import org.springframework.data.elasticsearch.core.query.highlight.HighlightParameters;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,8 +24,12 @@ public class AIService {
     private final Client client;
     private final ElasticsearchOperations elasticsearchOperations;
 
-     // Tìm các trang sách dựa trên từ khóa question
 
+    /**
+     * Tìm các trang sách dựa trên semantic search (vector similarity search)
+     * So sánh embedding của câu hỏi với embedding của nội dung các trang
+     * Phương pháp này hiểu được ngữ nghĩa của câu hỏi, không chỉ từ khóa
+     */
     public List<AIResponseDTO> searchPages(AIRequestDTO aiRequestDTO) {
         String keyword = aiRequestDTO.getQuestion();
 
@@ -57,8 +56,14 @@ public class AIService {
                 .toList();
     }
 
-    //Câu trả lời của Gemini
+
+
+
+    /**
+     * Trả lời câu hỏi của người dùng dựa trên semantic search
+     */
     public FullAIResponseDTO askGemini(AIRequestDTO aiRequestDTO) {
+        // Sử dụng semantic search để tìm các trang liên quan
         List<AIResponseDTO> pages = searchPages(aiRequestDTO);
 
         // Gom nội dung các trang sách thành prompt
@@ -86,6 +91,9 @@ public class AIService {
             );
 
             answer = response.text();
+            if (answer != null && !answer.isEmpty()) {
+                answer = answer.stripLeading(); // Loại bỏ newline/space đầu
+            }
 
         } catch (com.google.genai.errors.ClientException e) {
             // Bắt lỗi 429 Too Many Requests
@@ -103,5 +111,4 @@ public class AIService {
         }
         return new FullAIResponseDTO(answer, sources);
     }
-
 }
