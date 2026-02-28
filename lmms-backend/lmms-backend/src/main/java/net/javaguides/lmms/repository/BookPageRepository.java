@@ -10,4 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface BookPageRepository extends JpaRepository<BookPage, Long> {
     @Transactional
     void deleteByBookId(Long bookId);
+
+    // Find all pages for a given book id (used for reindexing/sync)
+    java.util.List<BookPage> findByBook_Id(Long bookId);
 }

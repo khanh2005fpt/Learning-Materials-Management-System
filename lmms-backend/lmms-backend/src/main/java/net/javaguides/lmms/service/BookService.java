@@ -33,10 +33,11 @@
         private final BookRepository bookRepository;
         private final FileStorageService storageService;
         private final BookPageSearchRepository searchRepo;
+        private final EmbeddingService embeddingService;
         private final CategoryRepository categoryRepository;
         // Regex normalize toán học
         private static final Pattern MATH_PATTERN = Pattern.compile("ℳ|σ2|σ|Π|∫|≤|≥");
-        private static final int CHUNK_MAX_LENGTH = 1500; // ~300-400 tokens
+        private static final int CHUNK_MAX_LENGTH = 700; //
         private static final int CHUNK_MIN_LENGTH = 5;
         private static final Pattern MATH_LINE_PATTERN =
                 Pattern.compile(".*[=∫σΣΠ^_≤≥].*");
@@ -144,21 +145,26 @@
         // Bulk index async với embeddings
         @Async("threadPoolTaskExecutor")
         public void indexBatch(List<BookPage> pages) {
-            List<BookPageDocument> docs = pages.stream()
-                    .map(p -> {
-                        // Generate embedding cho content
+                List<BookPageDocument> docs = new ArrayList<>();
+                for (BookPage page : pages) {
+                        float[] embedding = embeddingService.generateContentEmbedding(page.getContent());
 
-                        return new BookPageDocument(
-                                p.getBook().getId() + "-" + p.getPageNumber(),
-                                p.getBook().getId(),
-                                p.getBook().getTitle(),
-                                p.getPageNumber(),
-                                p.getContent(),
-                                p.getBook().getFilepath()
+                        BookPageDocument bookPageDocument = new BookPageDocument(
+                                page.getBook().getId() + "-" + page.getPageNumber(), // unique id
+                                page.getBook().getId(),
+                                page.getBook().getTitle(),
+                                page.getPageNumber(),
+                                page.getContent(), // lưu chunk
+                                page.getBook().getFilepath(),
+                                embedding
                         );
-                    })
-                    .toList();
-            searchRepo.saveAll(docs);
+                        docs.add(bookPageDocument);
+
+                }
+                if(!docs.isEmpty()) {
+                    searchRepo.saveAll(docs);
+                }
+            System.out.println("Indexed " + docs.size() + " chunks into Elasticsearch.");
         }
 
 

@@ -38,4 +38,8 @@ public class BookPageDocument {
     @Field(type = FieldType.Keyword)
     private String pdfPath;
 
+    @Field(type = FieldType.Dense_Vector, dims = 768, similarity = "cosine")
+    private float[] embedding;
+
 }
+

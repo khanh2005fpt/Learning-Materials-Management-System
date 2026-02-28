@@ -32,6 +32,7 @@ public class AIController {
      */
     @PostMapping("/ask")
     public FullAIResponseDTO askGeminiAPI(@RequestBody AIRequestDTO aiRequestDTO) {
+
         return aiService.askGemini(aiRequestDTO);
     }
 }

@@ -75,7 +75,6 @@ export default function HomePage() {
     setError(null);
     setAiAnswer(""); // Reset câu trả lời cũ
     setTypedAnswer("");
-
     try {
       const resAi = await axios.post("/api/auth/ask", { question });
       setAiAnswer(resAi.data.answer || "Không tìm thấy câu trả lời.");
@@ -203,32 +202,32 @@ export default function HomePage() {
               </div>
             </Col>
             <Col md={9} className="d-flex">
-            {books.length > 0 ? (
-              books.map((book) => (
-                <Col md={6} lg={4} key={book.id} className="mb-4">
-                  <Card className="border-0 shadow-sm hover-shadow transition book-card">
-                    <Card.Body className="d-flex flex-column">
-                      <div className="mb-2">
-                        <span className="badge bg-light text-primary border">PDF</span>
-                      </div>
-                      <Card.Title className="h5 fw-bold">{book.title}</Card.Title>
-                      <Card.Text className="text-muted mb-4 small">
-                        Tác giả: {book.author || "Đang cập nhật"}
-                      </Card.Text>
-                      <Button
-                        variant="outline-primary"
-                        className="mt-auto w-100"
-                        onClick={() => window.open(`http://localhost:8080/uploads/${book.filepath}`, "_blank")}
-                      >
-                        Đọc tài liệu
-                      </Button>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              ))
-            ) : (
-              !loading && <p className="text-center text-muted">Chưa có sách nào trong thư viện.</p>
-            )}
+              {books.length > 0 ? (
+                books.map((book) => (
+                  <Col md={6} lg={4} key={book.id} className="mb-4">
+                    <Card className="border-0 shadow-sm hover-shadow transition book-card">
+                      <Card.Body className="d-flex flex-column">
+                        <div className="mb-2">
+                          <span className="badge bg-light text-primary border">PDF</span>
+                        </div>
+                        <Card.Title className="h5 fw-bold">{book.title}</Card.Title>
+                        <Card.Text className="text-muted mb-4 small">
+                          Tác giả: {book.author || "Đang cập nhật"}
+                        </Card.Text>
+                        <Button
+                          variant="outline-primary"
+                          className="mt-auto w-100"
+                          onClick={() => window.open(`http://localhost:8080/uploads/${book.filepath}`, "_blank")}
+                        >
+                          Đọc tài liệu
+                        </Button>
+                      </Card.Body>
+                    </Card>
+                  </Col>
+                ))
+              ) : (
+                !loading && <p className="text-center text-muted">Chưa có sách nào trong thư viện.</p>
+              )}
             </Col>
 
           </Row>

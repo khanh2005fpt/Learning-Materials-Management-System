@@ -13,4 +13,7 @@ public class AIResponseDTO {
     private int pageNumber;
     private String snippet;
     private String filepath;
+    private float[] embedding;
+
+
 }
