@@ -1,23 +1,30 @@
 package net.javaguides.lmms.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.javaguides.lmms.dto.AIRequestDTO;
 import net.javaguides.lmms.dto.AIResponseDTO;
 import net.javaguides.lmms.dto.FullAIResponseDTO;
 import net.javaguides.lmms.entity.BookPageDocument;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AIService {
@@ -31,12 +38,13 @@ public class AIService {
      * So sánh embedding của câu hỏi với embedding của nội dung các trang
      * Phương pháp này hiểu được ngữ nghĩa của câu hỏi, không chỉ từ khóa
      */
-    private static final float SIMILARITY_THRESHOLD = 0.7f;
+
+
 
     public List<AIResponseDTO> searchPages(AIRequestDTO aiRequestDTO) {
 
         float[] questionEmbedding = embeddingService.generateQuestionEmbedding(aiRequestDTO.getQuestion());
-
+        System.out.println(aiRequestDTO.getQuestion());
         List<Float> vectorQuestion = new ArrayList<>();
         for (float f : questionEmbedding)
         {
@@ -44,20 +52,38 @@ public class AIService {
         }
 
         NativeQuery query = NativeQuery.builder()
-                .withQuery(q -> q.knn(k -> k
-                        .field("embedding")
-                        .queryVector(vectorQuestion)
-                        .k(20) // lấy nhiều hơn để lọc threshold
-                        .numCandidates(100)
+                .withQuery(q -> q.bool(b -> b
+                        // should = OR giữa các điều kiện
+                        .should(s -> s.knn(k -> k
+                                .field("embedding")
+                                .queryVector(vectorQuestion)
+                                .k(60)
+                                .numCandidates(120)
+                        ))
+                        .should(s -> s.match(m -> m
+                                .field("content")           // hoặc "content^2" nếu muốn boost
+                                .query(aiRequestDTO.getQuestion())
+                                .boost(0.8f)
+                        ))
+                        // Có thể thêm minimum_should_match để ép phải khớp ít nhất 1 nhánh
+                        .minimumShouldMatch("1")
                 ))
-                .withMaxResults(20)
+                .withSort(Sort.by(Sort.Order.desc("_score")))   // sắp xếp theo score tổng
+                .withMaxResults(25)     // lấy nhiều hơn để lọc sau
                 .build();
 
         SearchHits<BookPageDocument> results = elasticsearchOperations.search(query, BookPageDocument.class);
+        for (SearchHit<BookPageDocument> hit : results) {
+            float sim = cosineSimilarity(questionEmbedding, hit.getContent().getEmbedding());
+            if(sim >= 0.55f)
+            {
+                System.out.println("Page " + hit.getContent().getPageNumber() + " sim=" + sim + " Book " + hit.getContent().getBookTitle());
+            }
+        }
 
         // Filter theo cosine similarity
         return results.getSearchHits().stream()
-                .filter(hit -> hit.getScore() >= SIMILARITY_THRESHOLD)
+                .filter(hit -> cosineSimilarity(questionEmbedding, hit.getContent().getEmbedding()) >= 0.55f)
                 .map(SearchHit::getContent)
                 .map(doc -> new AIResponseDTO(
                         doc.getBookTitle(),
@@ -78,7 +104,8 @@ public class AIService {
             normA += vec1[i] * vec1[i];
             normB += vec2[i] * vec2[i];
         }
-        return dot / ((float) Math.sqrt(normA) * (float) Math.sqrt(normB) + 1e-10f);
+        return dot / ((float) Math.sqrt(normA) * (float) Math.sqrt
+                (normB) + 1e-10f);
     }
 
     /**

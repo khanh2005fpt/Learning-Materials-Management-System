@@ -37,7 +37,7 @@
         private final CategoryRepository categoryRepository;
         // Regex normalize toán học
         private static final Pattern MATH_PATTERN = Pattern.compile("ℳ|σ2|σ|Π|∫|≤|≥");
-        private static final int CHUNK_MAX_LENGTH = 700; //
+        private static final int CHUNK_MAX_LENGTH = 1200; //
         private static final int CHUNK_MIN_LENGTH = 5;
         private static final Pattern MATH_LINE_PATTERN =
                 Pattern.compile(".*[=∫σΣΠ^_≤≥].*");
@@ -146,11 +146,17 @@
         @Async("threadPoolTaskExecutor")
         public void indexBatch(List<BookPage> pages) {
                 List<BookPageDocument> docs = new ArrayList<>();
-                for (BookPage page : pages) {
+            int chunkIndex = 0;
+
+            for (BookPage page : pages) {
                         float[] embedding = embeddingService.generateContentEmbedding(page.getContent());
 
+                        String id = page.getBook().getId()
+                        + "-" + page.getPageNumber()
+                        + "-" + chunkIndex++;
+
                         BookPageDocument bookPageDocument = new BookPageDocument(
-                                page.getBook().getId() + "-" + page.getPageNumber(), // unique id
+                                id, // unique id
                                 page.getBook().getId(),
                                 page.getBook().getTitle(),
                                 page.getPageNumber(),
