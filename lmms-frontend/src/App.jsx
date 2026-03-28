@@ -7,6 +7,7 @@ import PrivateRoute from './components/auth/PrivateRoute';
 import NavbarSystem from './components/common/NavbarSystem';
 import HomePage from './components/user/HomePage';
 import Footer from './components/common/Footer';
+import PublicRoute from './components/auth/PublicRoute';
 
 function App() {
   const location = useLocation();
@@ -20,8 +21,16 @@ function App() {
       {!hideNavbar && <NavbarSystem />}
 
       <Routes>
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={
+          <PublicRoute>
+            <Register />
+          </PublicRoute>
+        } />
+        <Route path="/login" element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        } />
 
         <Route
           path="/admin"
@@ -31,7 +40,7 @@ function App() {
             </PrivateRoute>
           }
         />
-
+ 
         <Route path="/" element={<HomePage />} />
          <Route
           path="/user"

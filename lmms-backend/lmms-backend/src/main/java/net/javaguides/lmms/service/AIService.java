@@ -59,6 +59,7 @@ public class AIService {
                                 .queryVector(vectorQuestion)
                                 .k(60)
                                 .numCandidates(120)
+                                .boost(1.2f)
                         ))
                         .should(s -> s.match(m -> m
                                 .field("content")           // hoặc "content^2" nếu muốn boost
@@ -97,7 +98,7 @@ public class AIService {
     }
 
     // Hàm cosine similarity
-    private float cosineSimilarity(float[] vec1, float[] vec2) {
+    public float cosineSimilarity(float[] vec1, float[] vec2) {
         float dot = 0f, normA = 0f, normB = 0f;
         for (int i = 0; i < vec1.length; i++) {
             dot += vec1[i] * vec2[i];
@@ -125,7 +126,7 @@ public class AIService {
         StringBuilder context = new StringBuilder();
         for (AIResponseDTO p : pages) {
             context.append("[").append(p.getBookTitle())
-                    .append(" - Page ").append(p.getPageNumber())
+                    .append(" - Trang ").append(p.getPageNumber())
                     .append("]: ").append(p.getSnippet())
                     .append("\n");
         }
@@ -134,6 +135,7 @@ public class AIService {
         String prompt = """
                 Bạn là một trợ lý học thuật thông minh. Trả lời câu hỏi dựa trên các tài liệu đã cung cấp.
                 Chỉ sử dụng thông tin từ các trang được liệt kê bên dưới. Nếu thông tin không có trong tài liệu, hãy trả lời "Không có dữ liệu để trả lời".
+                Hãy trả lời đầy đủ, kết hợp thông tin từ tất cả các trang. Không bỏ sót thông tin vì bị cắt trang.
                 
                 --- Tài liệu tham khảo ---
                 %s

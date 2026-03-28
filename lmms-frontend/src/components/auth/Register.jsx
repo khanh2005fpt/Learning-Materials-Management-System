@@ -15,11 +15,11 @@ export default function Register() {
         try {
             const res = await axios.post("/api/auth/register", {
                 fullname, email, username, password
-            });
-
-            setMessage(res.data);
+            }); 
+            
+            setMessage(res.data.message || "Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.");
         } catch (err) {
-            setMessage(err.response?.data || "Error");
+            setMessage(err.response?.data?.message || "Sai thông tin đăng ký");
         }
     };
 
@@ -36,6 +36,7 @@ export default function Register() {
                     value={fullname}
                     onChange={(e) => setFullname(e.target.value)}
                     required
+                    autoComplete="off"
                 />
             </Form.Group>
             <Form.Group className="mb-3">
@@ -45,6 +46,7 @@ export default function Register() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    autoComplete="off"
                 />
             </Form.Group>
             <Form.Group className="mb-3">
@@ -54,6 +56,7 @@ export default function Register() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
+                    autoComplete="off"
                 />
             </Form.Group>
             <Form.Group className="mb-3">
@@ -63,6 +66,7 @@ export default function Register() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    autoComplete="off"
                 />
             </Form.Group>
             <Row className="d-flex justify-content-between">

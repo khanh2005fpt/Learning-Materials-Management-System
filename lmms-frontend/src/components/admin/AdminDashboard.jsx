@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Container, Table, Button, Form, Modal } from "react-bootstrap";
 import axios from "axios";
 import AddBook from "./AddBook";
@@ -7,20 +7,41 @@ import "./css/AdminDashboard.css";
 export default function AdminDashboard() {
     const [books, setBooks] = useState([]);
     const [show, setShow] = useState(false);
+    const [error, setError] = useState(null);
+    const [categories, setCategories] = useState([]);
+    const [selectedCategoryId, setSelectedCategoryId] = useState("ALL");
 
-    const fetchBooks = async () => {
-    try {
-      const res = await axios.get("/api/books");
-      console.log("API books response:", res.data);
-      setBooks(res.data)
-    } catch (err) {
-      console.error("Error fetching books:", err);
-    }
-  }
+    const fetchCategories = useCallback(async () => {
+        try {
+            const res = await axios.get("/api/categories");
+            setCategories([{ id: "ALL", name: "Tất cả" }, ...res.data]);
+        } catch (err) {
+            console.error("Lỗi tải category", err);
+        }
+    }, []);
+
+
+    // Fetch danh sách sách ban đầu
+    const fetchBooks = useCallback(async (categoryId = null) => {
+        setError(null);
+        try {
+            const url =
+                categoryId && categoryId !== "ALL"
+                    ? `/api/categories/${categoryId}`
+                    : `/api/books`;
+
+            const res = await axios.get(url);
+            setBooks(Array.isArray(res.data) ? res.data : []);
+        } catch (err) {
+            setError("Không thể tải danh sách sách. Vui lòng thử lại.");
+            console.error("Lỗi tải sách:", err);
+        }
+    }, []);
 
     useEffect(() => {
+        fetchCategories();
         fetchBooks();
-    }, []);
+    }, [fetchCategories, fetchBooks]);
 
     const handleDelete = async (id) => {
         const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa sách này?");
@@ -47,6 +68,22 @@ export default function AdminDashboard() {
                     <button className="btn-add-book" onClick={() => setShow(true)}>
                         + Thêm sách mới
                     </button>
+
+                    <Form.Select
+                        value={selectedCategoryId}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            setSelectedCategoryId(value);
+                            fetchBooks(value);
+                        }}
+                        style={{ maxWidth: "250px", marginLeft: "10px" }}
+                    >
+                        {categories.map((c) => (
+                            <option key={c.id} value={c.id}>
+                                {c.name}
+                            </option>
+                        ))}
+                    </Form.Select>
                 </div>
 
                 <div className="admin-table-container">
@@ -93,10 +130,10 @@ export default function AdminDashboard() {
                     )}
                 </div>
 
-                <AddBook 
-                    show={show} 
-                    onHide={() => setShow(false)} 
-                    onUploaded={fetchBooks} 
+                <AddBook
+                    show={show}
+                    onHide={() => setShow(false)}
+                    onUploaded={fetchBooks}
                 />
             </div>
         </div>

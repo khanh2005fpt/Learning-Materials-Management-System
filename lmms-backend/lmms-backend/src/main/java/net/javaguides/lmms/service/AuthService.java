@@ -22,10 +22,10 @@ public class AuthService {
     public ResponseEntity<?> login(LoginRequestDTO requestDTO) {
         User user = userRepository.findByUsername(requestDTO.getUsername());
         if (user == null) {
-            return ResponseEntity.status(402).body(Map.of("message", "User not found"));
+            return ResponseEntity.status(401).body(Map.of("message", "Không tìm thấy tên người dùng"));
         }
         if (!passwordEncoder.matches(requestDTO.getPassword(), user.getPassword())) {
-            return ResponseEntity.status(402).body(Map.of("message", "Wrong password"));
+            return ResponseEntity.status(401).body(Map.of("message", "Sai mật khẩu"));
         }
 
         String token = jwtService.generateToken(user.getUsername(), user.getRole().name());
@@ -37,12 +37,12 @@ public class AuthService {
 
 
 
-    public String register(RegisterRequestDTO requestDTO) {
+    public ResponseEntity<?> register(RegisterRequestDTO requestDTO) {
         if(userRepository.existsByEmail(requestDTO.getEmail())) {
-            return "Email already exists";
+            return ResponseEntity.status(401).body(Map.of("message","Email đã tồn tại" ));
         }
         if (userRepository.existsByUsername(requestDTO.getUsername())) {
-            return "Username already exists";
+            return ResponseEntity.status(401).body(Map.of("message","Tên đăng nhập đã tồn tại"));
         }
 
         User user = new User();
@@ -52,6 +52,6 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(requestDTO.getPassword()));
         user.setRole(Role.USER);
         userRepository.save(user);
-        return "User registered successfully";
+        return ResponseEntity.status(200).body(Map.of("message", "Đăng ký thành công"));
     }
 }
