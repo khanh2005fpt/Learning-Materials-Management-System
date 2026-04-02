@@ -3,6 +3,7 @@ import { Container, Table, Button, Form, Modal } from "react-bootstrap";
 import axios from "axios";
 import AddBook from "./AddBook";
 import "./css/AdminDashboard.css";
+import UpdateBook from "./UpdateBook";
 
 export default function AdminDashboard() {
     const [books, setBooks] = useState([]);
@@ -10,6 +11,8 @@ export default function AdminDashboard() {
     const [error, setError] = useState(null);
     const [categories, setCategories] = useState([]);
     const [selectedCategoryId, setSelectedCategoryId] = useState("ALL");
+    const [showUpdate, setShowUpdate] = useState(false);
+    const [selectedBook, setSelectedBook] = useState(null);
 
     const fetchCategories = useCallback(async () => {
         try {
@@ -70,13 +73,14 @@ export default function AdminDashboard() {
                     </button>
 
                     <Form.Select
+                        id="category-select"
+                        name="category"
                         value={selectedCategoryId}
                         onChange={(e) => {
                             const value = e.target.value;
                             setSelectedCategoryId(value);
                             fetchBooks(value);
                         }}
-                        style={{ maxWidth: "250px", marginLeft: "10px" }}
                     >
                         {categories.map((c) => (
                             <option key={c.id} value={c.id}>
@@ -108,12 +112,33 @@ export default function AdminDashboard() {
                                             <td>{b.category.name}</td>
                                             <td>
                                                 <div className="table-actions">
+
+                                                    <button
+                                                        className="btn-view"
+                                                        onClick={() =>
+                                                            window.open(`http://localhost:8080/uploads/${b.filepath}?t=${Date.now()}#page=1`, "_blank")
+                                                        }
+                                                    >
+                                                        👁️ Xem
+                                                    </button>
+
+                                                    <button
+                                                        className="btn-edit"
+                                                        onClick={() => {
+                                                            setSelectedBook(b);
+                                                            setShowUpdate(true);
+                                                        }}
+                                                    >
+                                                        ✏️ Sửa
+                                                    </button>
+
                                                     <button
                                                         className="btn-delete"
                                                         onClick={() => handleDelete(b.id)}
                                                     >
                                                         🗑️ Xóa
                                                     </button>
+
                                                 </div>
                                             </td>
                                         </tr>
@@ -135,6 +160,13 @@ export default function AdminDashboard() {
                     onHide={() => setShow(false)}
                     onUploaded={fetchBooks}
                 />
+                <UpdateBook
+                    show={showUpdate}
+                    onHide={() => setShowUpdate(false)}
+                    onUpdated={fetchBooks}
+                    book={selectedBook}
+                />
+
             </div>
         </div>
     );

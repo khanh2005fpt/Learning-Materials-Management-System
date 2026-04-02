@@ -76,7 +76,7 @@ public class AIService {
         SearchHits<BookPageDocument> results = elasticsearchOperations.search(query, BookPageDocument.class);
         for (SearchHit<BookPageDocument> hit : results) {
             float sim = cosineSimilarity(questionEmbedding, hit.getContent().getEmbedding());
-            if(sim >= 0.55f)
+            if(sim >= 0.45f)
             {
                 System.out.println("Page " + hit.getContent().getPageNumber() + " sim=" + sim + " Book " + hit.getContent().getBookTitle());
             }
@@ -84,7 +84,7 @@ public class AIService {
 
         // Filter theo cosine similarity
         return results.getSearchHits().stream()
-                .filter(hit -> cosineSimilarity(questionEmbedding, hit.getContent().getEmbedding()) >= 0.55f)
+                .filter(hit -> cosineSimilarity(questionEmbedding, hit.getContent().getEmbedding()) >= 0.45f)
                 .map(SearchHit::getContent)
                 .map(doc -> new AIResponseDTO(
                         doc.getBookTitle(),

@@ -69,5 +69,8 @@ public class BookController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-
+    @PutMapping("/{id}")
+    public Book updateBook(@PathVariable Long id, @RequestBody UploadResponseDTO updatedBook){
+       return bookService.updateBook(id, updatedBook);
+    }
 }

@@ -131,8 +131,9 @@ export default function HomePage() {
 
 
   return (
-    <Container className="home-page" >
-      {/* Header Section */}
+    <div className="home-page" >
+      <Container>
+              {/* Header Section */}
       <header className="home-hero text-center">
         <h1 className="display-4 fw-bold home-title">
           Thư viện Sách & Tài liệu
@@ -275,6 +276,7 @@ export default function HomePage() {
 
         </section>
       )}
-    </Container>
+      </Container>
+    </div>
   );
 }

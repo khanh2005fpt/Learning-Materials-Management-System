@@ -7,11 +7,11 @@ export default function AIAnswer({ answer, sources = [] }) {
   useEffect(() => {
     if (answer) {
 
-      console.log("AIAnswer received answer:", answer);
-      console.log("Sources:", sources);
-      console.log(JSON.stringify(answer));
-      console.log(answer.charAt(0));
-      console.log(answer.charCodeAt(0));
+      // console.log("AIAnswer received answer:", answer);
+      // console.log("Sources:", sources);
+      // console.log(JSON.stringify(answer));
+      // console.log(answer.charAt(0));
+      // console.log(answer.charCodeAt(0));
     }
   }, [answer, sources]); // Chỉ chạy khi answer hoặc sources thay đổi
 

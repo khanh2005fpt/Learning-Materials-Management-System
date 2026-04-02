@@ -8,6 +8,7 @@ import NavbarSystem from './components/common/NavbarSystem';
 import HomePage from './components/user/HomePage';
 import Footer from './components/common/Footer';
 import PublicRoute from './components/auth/PublicRoute';
+import About from './components/user/About';
 
 function App() {
   const location = useLocation();
@@ -42,6 +43,7 @@ function App() {
         />
  
         <Route path="/" element={<HomePage />} />
+        <Route path="/about" element={<About />} />
          <Route
           path="/user"
           element={

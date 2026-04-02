@@ -7,7 +7,7 @@ export default function Footer() {
     <footer className="simple-footer">
       <Container className="text-center py-3">
         <p className="mb-1">
-          © 2026 <strong>BookManager</strong>. All rights reserved.
+          © 2026 - Hệ thống quản lý tài liệu | Developed by Bảo Khánh 🚀
         </p>
         <p className="mb-0">
           Thư viện sách & tài liệu học tập trực tuyến

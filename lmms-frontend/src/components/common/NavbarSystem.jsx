@@ -39,10 +39,8 @@ export default function NavbarSystem() {
                 <Navbar.Toggle />
                 <Navbar.Collapse>
                     {/* Menu bên trái */}
-                    <Nav className="me-auto" style={{marginLeft: "100px"}}>
+                    <Nav className="me-auto" style={{marginLeft: "350px"}}>
                         <Nav.Link href="/">Trang chủ</Nav.Link>
-                        <Nav.Link href="/books">Sách</Nav.Link>
-                        <Nav.Link href="/search">Tìm kiếm</Nav.Link>
                         <Nav.Link href="/about">Giới thiệu</Nav.Link>
                     </Nav>
 

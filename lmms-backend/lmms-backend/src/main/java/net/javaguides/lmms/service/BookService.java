@@ -213,6 +213,38 @@
         public List<Book> getBooksByCategory(Long categoryid) {
             return bookRepository.findByCategory_Id(categoryid);
         }
+
+        public Book updateBook(Long bookid, UploadResponseDTO updatedBook){
+
+
+            Book book = bookRepository.findById(bookid).orElseThrow(() -> new RuntimeException("Không tìm thấy sách"));
+            if (updatedBook.getCategoryName() != null && !updatedBook.getCategoryName().isBlank()) {
+
+                Category category = categoryRepository
+                        .findByName(updatedBook.getCategoryName())
+                        .orElseGet(() -> {
+                            Category c = new Category();
+                            c.setName(updatedBook.getCategoryName());
+                            return categoryRepository.save(c);
+                        });
+
+                book.setCategory(category);
+            }
+            if(updatedBook.getTitle() != null && !updatedBook.getTitle().isBlank()) {
+                book.setTitle(updatedBook.getTitle());
+            }
+            if(updatedBook.getAuthor() != null && !updatedBook.getAuthor().isBlank()) {
+                book.setAuthor(updatedBook.getAuthor());
+
+            }
+            if(updatedBook.getDescription() != null && !updatedBook.getDescription().isBlank()) {
+                book.setDescription(updatedBook.getDescription());
+            }
+
+            Book saved = bookRepository.save(book);
+            return saved;
+        }
+
         public void deleteBook(Long bookId){
             // 1. Tìm book
             Book book = bookRepository.findById(bookId)
