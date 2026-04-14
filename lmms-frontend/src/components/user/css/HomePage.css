@@ -112,3 +112,27 @@
   .home-search .form-control { height: 52px; }
   .ai-area .ai-card { padding: 16px; }
 }
+
+.custom-pagination .pagination {
+  padding: 8px;
+  border-radius: 12px;
+}
+
+.custom-pagination .page-item .page-link {
+  background-color: #1890ff;
+  color: white;
+  border: 1px solid #1890ff;
+  margin: 0 3px;
+  border-radius: 8px;
+}
+
+.custom-pagination .page-item.active .page-link {
+  background-color: #096dd9;
+  border-color: #096dd9;
+  color: white;
+}
+
+.custom-pagination .page-item .page-link:hover {
+  background-color: #096dd9;
+  color: white;
+}

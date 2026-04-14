@@ -17,6 +17,7 @@ import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
@@ -39,12 +40,29 @@ public class AIService {
      * Phương pháp này hiểu được ngữ nghĩa của câu hỏi, không chỉ từ khóa
      */
 
+    public String translate(String text) {
+        RestTemplate restTemplate = new RestTemplate(); //Call API local Ollama
 
+        String prompt = "Translate this to English: " + text;
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("model","qwen:4b");
+        body.put("prompt", prompt);
+        body.put("stream", false);
+
+        Map response = restTemplate.postForObject("http://localhost:11434/api/generate", body, Map.class);
+
+        if (response == null || response.get("response") == null) {
+            return "Translate failed";
+        }
+        return (String) response.get("response");
+    }
 
     public List<AIResponseDTO> searchPages(AIRequestDTO aiRequestDTO) {
-
-        float[] questionEmbedding = embeddingService.generateQuestionEmbedding(aiRequestDTO.getQuestion());
-        System.out.println(aiRequestDTO.getQuestion());
+        String question = translate(aiRequestDTO.getQuestion());
+        System.out.println("Question: " + question);
+        float[] questionEmbedding = embeddingService.generateQuestionEmbedding(question);
+//        System.out.println(aiRequestDTO.getQuestion());
         List<Float> vectorQuestion = new ArrayList<>();
         for (float f : questionEmbedding)
         {

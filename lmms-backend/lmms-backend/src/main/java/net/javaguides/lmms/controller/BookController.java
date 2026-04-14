@@ -3,11 +3,13 @@ package net.javaguides.lmms.controller;
 import lombok.RequiredArgsConstructor;
 import net.javaguides.lmms.dto.UploadResponseDTO;
 import net.javaguides.lmms.entity.Book;
-import net.javaguides.lmms.entity.Category;
 import net.javaguides.lmms.repository.BookRepository;
 import net.javaguides.lmms.service.BookService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -51,8 +52,11 @@ public class BookController {
     }
 
     @GetMapping
-    public List<Book> list() {
-        return bookRepository.findAll();
+    public Page<Book> getAllBooksAndPagination(@RequestParam(defaultValue = "0") int page,
+                                               @RequestParam(defaultValue = "5") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        return bookRepository.findAll(pageable);
     }
 
     @DeleteMapping("/{id}")
@@ -73,4 +77,5 @@ public class BookController {
     public Book updateBook(@PathVariable Long id, @RequestBody UploadResponseDTO updatedBook){
        return bookService.updateBook(id, updatedBook);
     }
+
 }

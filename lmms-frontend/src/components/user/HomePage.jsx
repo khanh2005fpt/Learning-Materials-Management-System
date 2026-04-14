@@ -9,7 +9,8 @@ import {
   InputGroup,
   FormControl,
   Spinner,
-  ListGroup
+  ListGroup,
+  Pagination
 } from "react-bootstrap";
 import axios from "axios";
 import AIAnswer from "./AIAnswer.jsx";
@@ -27,6 +28,8 @@ export default function HomePage() {
   const [typedAnswer, setTypedAnswer] = useState("");
   const [aiSources, setAiSources] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
   const shouldHideBooks = loading || aiAnswer !== "";
 
@@ -41,16 +44,17 @@ export default function HomePage() {
 
 
   // Fetch danh sách sách ban đầu
-  const fetchBooks = useCallback(async (categoryId = null) => {
+  const fetchBooks = useCallback(async (categoryId = null, pageNo = 0) => {
     setError(null);
     try {
       const url =
         categoryId && categoryId !== "ALL"
-          ? `/api/categories/${categoryId}`
-          : `/api/books`;
+          ? `/api/categories/${categoryId}?page=${pageNo}&size=6`
+          : `/api/books?page=${pageNo}&size=6`;
 
       const res = await axios.get(url);
-      setBooks(Array.isArray(res.data) ? res.data : []);
+      setBooks(Array.isArray(res.data.content) ? res.data.content : []);
+      setTotalPages(res.data.totalPages || 0);
     } catch (err) {
       setError("Không thể tải danh sách sách. Vui lòng thử lại.");
       console.error("Lỗi tải sách:", err);
@@ -59,8 +63,11 @@ export default function HomePage() {
 
   useEffect(() => {
     fetchCategories();
-    fetchBooks();
-  }, [fetchCategories, fetchBooks]);
+  }, []);
+
+  useEffect(() => {
+    fetchBooks(selectedCategoryId, page);
+  }, [selectedCategoryId, page]);
 
   // Xử lý tìm kiếm và hỏi AI
   const handleSearch = async () => {
@@ -93,7 +100,7 @@ export default function HomePage() {
     setTypedAnswer("");
     let index = 0;
     const interval = setInterval(() => {
-     setTypedAnswer(aiAnswer.substring(0, index));
+      setTypedAnswer(aiAnswer.substring(0, index));
       index++;
       if (index >= aiAnswer.length) {
         clearInterval(interval);
@@ -133,149 +140,184 @@ export default function HomePage() {
   return (
     <div className="home-page" >
       <Container>
-              {/* Header Section */}
-      <header className="home-hero text-center">
-        <h1 className="display-4 fw-bold home-title">
-          Thư viện Sách & Tài liệu
-        </h1>
-        <p className="lead text-muted mx-auto" style={{ maxWidth: "600px" }}>
-          Tra cứu thông tin thông minh với AI và khám phá hàng ngàn tài liệu học thuật miễn phí.
-        </p>
-      </header>
+        {/* Header Section */}
+        <header className="home-hero text-center">
+          <h1 className="display-4 fw-bold home-title">
+            Thư viện Sách & Tài liệu
+          </h1>
+          <p className="lead text-muted mx-auto" style={{ maxWidth: "600px" }}>
+            Tra cứu thông tin thông minh với AI và khám phá hàng ngàn tài liệu học thuật miễn phí.
+          </p>
+        </header>
 
-      {/* Search Bar Section */}
-      <Row className="justify-content-center">
-        <Col lg={8}>
-          <InputGroup size="lg" className="shadow-sm position-relative home-search">
-            <FormControl
-              placeholder={localStorage.getItem("token") ? "Nhập câu hỏi về tài liệu..." : "Đăng nhập để đặt câu hỏi cho AI..."}
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            // Vô hiệu hóa input nếu muốn cưỡng ép đăng nhập
-            // disabled={!localStorage.getItem("token")} 
-            />
-            <Button
-              variant={localStorage.getItem("token") ? "primary" : "secondary"}
-              onClick={handleSearch}
-              disabled={loading}
-              className="px-4"
-            >
-              {loading ? <Spinner animation="border" size="sm" /> : "Hỏi AI"}
-            </Button>
-          </InputGroup>
+        {/* Search Bar Section */}
+        <Row className="justify-content-center">
+          <Col lg={8}>
+            <InputGroup size="lg" className="shadow-sm position-relative home-search">
+              <FormControl
+                placeholder={localStorage.getItem("token") ? "Nhập câu hỏi về tài liệu..." : "Đăng nhập để đặt câu hỏi cho AI..."}
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              // Vô hiệu hóa input nếu muốn cưỡng ép đăng nhập
+              // disabled={!localStorage.getItem("token")} 
+              />
+              <Button
+                variant={localStorage.getItem("token") ? "primary" : "secondary"}
+                onClick={handleSearch}
+                disabled={loading}
+                className="px-4"
+              >
+                {loading ? <Spinner animation="border" size="sm" /> : "Hỏi AI"}
+              </Button>
+            </InputGroup>
 
-          {/* Hiển thị nút đăng nhập nhanh nếu chưa có token */}
-          {!localStorage.getItem("token") && (
-            <p className="text-center mt-2 small text-muted">
-              Bạn chưa đăng nhập? <a href="/login" className="text-primary fw-bold">Đăng nhập ngay</a> để sử dụng AI.
-            </p>
-          )}
-        </Col>
-      </Row>
+            {/* Hiển thị nút đăng nhập nhanh nếu chưa có token */}
+            {!localStorage.getItem("token") && (
+              <p className="text-center mt-2 small text-muted">
+                Bạn chưa đăng nhập? <a href="/login" className="text-primary fw-bold">Đăng nhập ngay</a> để sử dụng AI.
+              </p>
+            )}
+          </Col>
+        </Row>
 
-      {/* AI Response Display Area */}
-      <Row className="justify-content-center mb-5">
-        <Col lg={10} className="ai-area">
-          {loading && !typedAnswer && (
-            <div className="text-center my-4">
-              <Spinner animation="grow" variant="primary" />
-              <p className="text-muted mt-2">AI đang tìm kiếm...</p>
-            </div>
-          )}
-          <div>
-            <AIAnswer answer={typedAnswer} sources={aiSources} />
-          </div>
-        </Col>
-      </Row>
-
-      {/* Error Alert */}
-      {error && (
-        <Alert variant="danger" className="d-flex align-items-center justify-content-between shadow-sm">
-          <div>
-            <i className="bi bi-exclamation-triangle-fill me-2"></i>
-            {error}
-          </div>
-          <Button variant="outline-danger" size="sm" onClick={fetchBooks}>Thử lại</Button>
-        </Alert>
-      )}
-
-      {/* Books Gallery */}
-
-      {!shouldHideBooks && (
-        <section className="mt-5 books-section">
-          <div className="d-flex align-items-center mb-4">
-            <h2 className="h4 fw-bold mb-0">📚 Tài liệu phổ biến</h2>
-            <hr className="flex-grow-1 ms-3 opacity-25" />
-          </div>
-
-          <Row>
-            <Col md={3}>
-              <div className="categories-section">
-                <h3 className="categories-title">Thể loại</h3>
-                <div className="categories-list">
-                  {categories.map((cat) => (
-                    <button
-                      key={cat.id}
-                      className={`category-item ${selectedCategoryId === cat.id ? 'active' : ''}`}
-                      onClick={() => {
-                        setSelectedCategoryId(cat.id);
-                        fetchBooks(cat.id);
-                      }}
-                    >
-                      {cat.name}
-                    </button>
-                  ))}
-                </div>
+        {/* AI Response Display Area */}
+        <Row className="justify-content-center">
+          <Col lg={10} className="ai-area">
+            {loading && !typedAnswer && (
+              <div className="text-center my-4">
+                <Spinner animation="grow" variant="primary" />
+                <p className="text-muted mt-2">AI đang tìm kiếm...</p>
               </div>
-            </Col>
-            <Col md={9}>
-              <Row className="g-4">
-                {books.length > 0 ? (
-                  books.map((book) => (
-                    <Col md={6} lg={4} key={book.id} className="mb-4">
-                      <Card className="border-0 shadow-sm hover-shadow transition book-card">
-                        <Card.Body className="d-flex flex-column">
-                          <div className="mb-2">
-                            <span className="badge bg-light text-primary border">PDF</span>
-                          </div>
-                          <Card.Title className="h5 fw-bold">{book.title}</Card.Title>
-                          <Card.Text className="text-muted mb-4 small">
-                            Tác giả: {book.author || "Đang cập nhật"}
-                          </Card.Text>
-                          <div className="mt-auto d-flex gap-2">
-                            <Button
-                              variant="outline-primary"
-                              className="w-50"
-                              onClick={() =>
-                                window.open(`http://localhost:8080/uploads/${book.filepath}`, "_blank")
-                              }
-                            >
-                              Đọc
-                            </Button>
+            )}
+            <div>
+              <AIAnswer answer={typedAnswer} sources={aiSources} />
+            </div>
+          </Col>
+        </Row>
 
-                            <Button
-                              variant="primary"
-                              className="w-50"
-                              onClick={() => handleDownload(book.filepath)}
-                            >
-                              Tải về
-                            </Button>
-                          </div>
-                        </Card.Body>
-                      </Card>
-                    </Col>
-                  ))
-                ) : (
-                  !loading && <p className="text-center text-muted">Chưa có sách nào trong thư viện.</p>
-                )}
-              </Row>
-            </Col>
+        {/* Error Alert */}
+        {error && (
+          <Alert variant="danger" className="d-flex align-items-center justify-content-between shadow-sm">
+            <div>
+              <i className="bi bi-exclamation-triangle-fill me-2"></i>
+              {error}
+            </div>
+            <Button variant="outline-danger" size="sm" onClick={fetchBooks}>Thử lại</Button>
+          </Alert>
+        )}
 
-          </Row>
+        {/* Books Gallery */}
 
-        </section>
-      )}
+        {!shouldHideBooks && (
+          <section className="mt-5 books-section">
+            <div className="d-flex align-items-center mb-4">
+              <h2 className="h4 fw-bold mb-0">📚 Tài liệu phổ biến</h2>
+              <hr className="flex-grow-1 ms-3 opacity-25" />
+            </div>
+
+            <Row>
+              <Col md={3}>
+                <div className="categories-section">
+                  <h3 className="categories-title">Thể loại</h3>
+                  <div className="categories-list">
+                    {categories.map((cat) => (
+                      <button
+                        key={cat.id}
+                        className={`category-item ${selectedCategoryId === cat.id ? 'active' : ''}`}
+                        onClick={() => {
+                          setSelectedCategoryId(cat.id);
+                          setPage(0);
+                        }}
+                      >
+                        {cat.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </Col>
+              <Col md={9}>
+                <Row>
+                  {books.length > 0 ? (
+                    books.map((book) => (
+                      <Col md={6} lg={4} key={book.id} className="mb-4">
+                        <Card className="border-0 shadow-sm hover-shadow transition book-card h-100">
+                          <Card.Body className="d-flex flex-column">
+                            <div className="mb-2">
+                              <span className="badge bg-light text-primary border">PDF</span>
+                            </div>
+                            <Card.Img
+                              variant="top"
+                              src="../src/assets/BaoKhanh.png"
+                              className="mb-2" />
+                            <Card.Title className="h5 fw-bold">{book.title}</Card.Title>
+                            <Card.Text className="text-muted mb-4 small">
+                              Tác giả: {book.author || "Đang cập nhật"}
+                            </Card.Text>
+                            <div className="mt-auto d-flex gap-2">
+                              <Button
+                                variant="outline-primary"
+                                className="w-50"
+                                onClick={() =>
+                                  window.open(`http://localhost:8080/uploads/${book.filepath}?t=${Date.now()}#page=1`, "_blank")
+                                }
+                              >
+                                Đọc
+                              </Button>
+
+                              <Button
+                                variant="primary"
+                                className="w-50"
+                                onClick={() => handleDownload(book.filepath)}
+                              >
+                                Tải về
+                              </Button>
+                            </div>
+                          </Card.Body>
+                        </Card>
+                      </Col>
+                    ))
+                  ) : (
+                    !loading && <p className="text-center text-muted">Chưa có sách nào trong thư viện.</p>
+                  )}
+                  {totalPages && (
+                    <div className="d-flex justify-content-center mt-4 custom-pagination">
+                      <Pagination>
+                        {/* Prev */}
+                        <Pagination.Prev
+                          disabled={page === 0}
+                          onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
+                        />
+
+                        {/* Page numbers */}
+                        {[...Array(totalPages).keys()].map((p) => (
+                          <Pagination.Item
+                            key={p}
+                            active={p === page}
+                            onClick={() => setPage(p)}
+                          >
+                            {p + 1}
+                          </Pagination.Item>
+                        ))}
+
+                        {/* Next */}
+                        <Pagination.Next
+                          disabled={page === totalPages - 1}
+                          onClick={() =>
+                            setPage((prev) => Math.min(prev + 1, totalPages - 1))
+                          }
+                        />
+                      </Pagination>
+                    </div>
+                  )}
+
+                </Row>
+              </Col>
+
+            </Row>
+
+          </section>
+        )}
       </Container>
     </div>
   );

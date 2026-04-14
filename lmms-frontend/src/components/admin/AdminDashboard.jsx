@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Container, Table, Button, Form, Modal } from "react-bootstrap";
+import { Container, Table, Button, Form, Modal, Pagination } from "react-bootstrap";
 import axios from "axios";
 import AddBook from "./AddBook";
 import "./css/AdminDashboard.css";
@@ -13,7 +13,8 @@ export default function AdminDashboard() {
     const [selectedCategoryId, setSelectedCategoryId] = useState("ALL");
     const [showUpdate, setShowUpdate] = useState(false);
     const [selectedBook, setSelectedBook] = useState(null);
-
+    const [page, setPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
     const fetchCategories = useCallback(async () => {
         try {
             const res = await axios.get("/api/categories");
@@ -25,16 +26,17 @@ export default function AdminDashboard() {
 
 
     // Fetch danh sách sách ban đầu
-    const fetchBooks = useCallback(async (categoryId = null) => {
+    const fetchBooks = useCallback(async (categoryId = null, pageNo = 0) => {
         setError(null);
         try {
             const url =
                 categoryId && categoryId !== "ALL"
-                    ? `/api/categories/${categoryId}`
-                    : `/api/books`;
+                    ? `/api/categories/${categoryId}?page=${pageNo}&size=5`
+                    : `/api/books?page=${pageNo}&size=5`;
 
             const res = await axios.get(url);
-            setBooks(Array.isArray(res.data) ? res.data : []);
+            setBooks(Array.isArray(res.data.content) ? res.data.content : []);
+            setTotalPages(res.data.totalPages || 0);
         } catch (err) {
             setError("Không thể tải danh sách sách. Vui lòng thử lại.");
             console.error("Lỗi tải sách:", err);
@@ -43,8 +45,11 @@ export default function AdminDashboard() {
 
     useEffect(() => {
         fetchCategories();
-        fetchBooks();
-    }, [fetchCategories, fetchBooks]);
+    }, []);
+
+    useEffect(() => {
+        fetchBooks(selectedCategoryId, page);
+    }, [selectedCategoryId, page]);
 
     const handleDelete = async (id) => {
         const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa sách này?");
@@ -79,8 +84,7 @@ export default function AdminDashboard() {
                         onChange={(e) => {
                             const value = e.target.value;
                             setSelectedCategoryId(value);
-                            fetchBooks(value);
-                        }}
+                            setPage(0);}}
                     >
                         {categories.map((c) => (
                             <option key={c.id} value={c.id}>
@@ -153,8 +157,39 @@ export default function AdminDashboard() {
                             <p className="empty-state-subtext">Hãy bắt đầu bằng cách thêm sách mới</p>
                         </div>
                     )}
+                   
                 </div>
 
+                {totalPages && (
+                        <div className="d-flex justify-content-center mt-4 custom-pagination">
+                            <Pagination>
+                                {/* Prev */}
+                                <Pagination.Prev
+                                    disabled={page === 0}
+                                    onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
+                                />
+
+                                {/* Page numbers */}
+                                {[...Array(totalPages).keys()].map((p) => (
+                                    <Pagination.Item
+                                        key={p}
+                                        active={p === page}
+                                        onClick={() => setPage(p)}
+                                    >
+                                        {p + 1}
+                                    </Pagination.Item>
+                                ))}
+
+                                {/* Next */}
+                                <Pagination.Next
+                                    disabled={page === totalPages - 1}
+                                    onClick={() =>
+                                        setPage((prev) => Math.min(prev + 1, totalPages - 1))
+                                    }
+                                />
+                            </Pagination>
+                        </div>
+                    )}
                 <AddBook
                     show={show}
                     onHide={() => setShow(false)}

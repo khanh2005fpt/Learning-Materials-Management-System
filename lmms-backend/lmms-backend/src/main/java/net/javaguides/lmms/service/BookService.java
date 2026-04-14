@@ -13,6 +13,8 @@
     import org.apache.pdfbox.Loader;
     import org.apache.pdfbox.pdmodel.PDDocument;
     import org.apache.pdfbox.text.PDFTextStripper;
+    import org.springframework.data.domain.Page;
+    import org.springframework.data.domain.Pageable;
     import org.springframework.scheduling.annotation.Async;
     import org.springframework.stereotype.Service;
     import org.springframework.transaction.annotation.Transactional;
@@ -179,7 +181,43 @@
 
         @Transactional
         public Book createBook(UploadResponseDTO bookDTO) throws Exception {
-            // 2. Tìm hoặc tạo Category
+            // 1. Validate DTO null
+            if (bookDTO == null) {
+                throw new RuntimeException("Dữ liệu quyển sách không được null");
+            }
+
+            // 2. Validate title
+            String title = bookDTO.getTitle();
+            if (title == null || title.trim().isEmpty()) {
+                throw new RuntimeException("Title không được để trống");
+            }
+            if (title.length() > 255) {
+                throw new RuntimeException("Title quá dài");
+            }
+            if (bookRepository.existsByTitle(title)) {
+                throw new RuntimeException("Title đã tồn tại");
+            }
+
+            // 3. Validate author
+            String author = bookDTO.getAuthor();
+            if (author == null || author.trim().isEmpty()) {
+                throw new RuntimeException("Author không được để trống");
+            }
+            // 4. Validate description
+            String description = bookDTO.getDescription();
+            if (description == null || description.trim().isEmpty()) {
+                throw new RuntimeException("Description không được để trống");
+            }
+            if (description.length() > 1000) {
+                throw new RuntimeException("Description quá dài");
+            }
+            if (bookRepository.existsByDescription(description)) {
+                throw new RuntimeException("Description đã tồn tại");
+            }
+
+
+
+            // 5. Tìm hoặc tạo Category
             Category category = categoryRepository
                     .findByName(bookDTO.getCategoryName())
                     .orElseGet(() -> {
@@ -188,14 +226,15 @@
                         return categoryRepository.save(c);
                     });
 
+            // 6. Validate file
             MultipartFile file = bookDTO.getFilePath();
             if (file.isEmpty()) {
-                throw new RuntimeException("File is empty");
+                throw new RuntimeException("File đang trống");
             }
 
             if (!file.getContentType().equals("application/pdf")
                     && !file.getContentType().equals("application/octet-stream")) {
-                throw new RuntimeException("Only PDF allowed");
+                throw new RuntimeException("Chỉ được file pdf");
             }
             String storedPath = storageService.storeFile(file); //file lưu vào uploads
             Book book = new Book();
@@ -210,9 +249,10 @@
             return saved;
         }
 
-        public List<Book> getBooksByCategory(Long categoryid) {
-            return bookRepository.findByCategory_Id(categoryid);
+        public Page<Book> getBooksByCategory(Long categoryid, Pageable pageable) {
+            return bookRepository.findByCategory_Id(categoryid, pageable);
         }
+
 
         public Book updateBook(Long bookid, UploadResponseDTO updatedBook){
 

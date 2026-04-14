@@ -44,7 +44,7 @@ export default function AddBook({ show, onHide, onUploaded }) {
 
         try {
             await axios.post("/api/books/upload", formData, {
-                headers: { "Content-Type": "multipart/form-data" }
+                headers: { "Content-Type": "multipart/form-data" }   //Lưu dưới dạng khi có upload file
             });
             
             alert("Upload thành công!");
@@ -58,6 +58,7 @@ export default function AddBook({ show, onHide, onUploaded }) {
             setCategory("");
             setNewCategory("");
         } catch (error) {
+            console.error("Lỗi khi upload sách:", error.response.data);
             alert(error.response?.data?.message || "Lỗi khi upload sách. Vui lòng thử lại.");
         }
     };
