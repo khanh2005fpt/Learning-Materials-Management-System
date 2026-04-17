@@ -119,15 +119,15 @@
 }
 
 .custom-pagination .page-item .page-link {
-  background-color: #1890ff;
+  background-color: #06b6d4;
   color: white;
-  border: 1px solid #1890ff;
+  border: 1px solid #06b6d4;
   margin: 0 3px;
   border-radius: 8px;
 }
 
 .custom-pagination .page-item.active .page-link {
-  background-color: #096dd9;
+  background-color: #097bd9;
   border-color: #096dd9;
   color: white;
 }

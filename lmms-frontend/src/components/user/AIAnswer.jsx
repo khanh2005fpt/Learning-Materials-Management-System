@@ -17,6 +17,10 @@ export default function AIAnswer({ answer, sources = [] }) {
 
   if (!answer) return null;
 
+  // const shouldShowSources =
+  // sources.length > 0 &&
+  // typeof answer === "string" &&
+  // !answer.toLowerCase().includes("không có dữ liệu");
 
   return (
     <div className="ai-answer-container mt-4">

@@ -58,7 +58,7 @@ export default function AdminDashboard() {
         try {
             await axios.delete(`/api/books/${id}`);
             alert("Xóa sách thành công!");
-            fetchBooks(); // load lại danh sách
+            fetchBooks(selectedCategoryId, page); // load lại danh sách
         } catch (err) {
             console.error("Lỗi khi xóa sách:", err);
             alert("Xóa sách thất bại!");
@@ -84,7 +84,8 @@ export default function AdminDashboard() {
                         onChange={(e) => {
                             const value = e.target.value;
                             setSelectedCategoryId(value);
-                            setPage(0);}}
+                            setPage(0);
+                            }}
                     >
                         {categories.map((c) => (
                             <option key={c.id} value={c.id}>
@@ -193,12 +194,12 @@ export default function AdminDashboard() {
                 <AddBook
                     show={show}
                     onHide={() => setShow(false)}
-                    onUploaded={fetchBooks}
+                    onUploaded={() => fetchBooks(selectedCategoryId, page)}
                 />
                 <UpdateBook
                     show={showUpdate}
                     onHide={() => setShowUpdate(false)}
-                    onUpdated={fetchBooks}
+                    onUpdated={() => fetchBooks(selectedCategoryId, page)}
                     book={selectedBook}
                 />
 
